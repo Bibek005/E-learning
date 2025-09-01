@@ -1,0 +1,325 @@
+
+/* Navbar.css */
+
+.navbar {
+  width: 100%;
+  background: linear-gradient(135deg, #1e293b, #1e40af, #1e293b);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.3);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+}
+
+.navbar-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.navbar-logo-icon {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-logo-text {
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: white;
+  letter-spacing: 0.05em;
+}
+
+.navbar-desktop-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 2rem;
+}
+
+.navbar-nav-list {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.navbar-nav-link {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  color: #d1d5db;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.navbar-nav-link:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-search-container {
+  position: relative;
+  max-width: 400px;
+  width: 100%;
+}
+
+.navbar-search-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+  border: 1px solid #4b5563;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.875rem;
+  outline: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.navbar-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.navbar-search-input:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.3);
+}
+
+.navbar-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  width: 16px;
+  height: 16px;
+}
+
+.navbar-suggestions {
+  position: absolute;
+  z-index: 50;
+  margin-top: 0.5rem;
+  width: 100%;
+  max-height: 15rem;
+  overflow-y: auto;
+  background-color: #1f2937;
+  border: 1px solid #4b5563;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+  font-size: 0.875rem;
+  transition: background-color 0.2s ease;
+}
+
+.navbar-suggestion-item:hover {
+  background-color: #0d9488;
+}
+
+.navbar-auth-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navbar-auth-link {
+  text-decoration: none;
+  padding: 0.375rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.navbar-auth-link-signin {
+  color: #374151;
+  background-color: white;
+  padding: 0.375rem 1.25rem;
+  border-radius: 0.5rem;
+}
+
+.navbar-auth-link-signin:hover {
+  color: white;
+  background-color: #374151;
+}
+
+.navbar-auth-link-get-started {
+  background: linear-gradient(to right, #14b8a6, #3b82f6);
+  color: white;
+  padding: 0.375rem 1.25rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-auth-link-get-started:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-hamburger {
+  color: white;
+  padding: 0.625rem;
+  border: none;
+  background: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-hamburger:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile Menu */
+.navbar-mobile-menu {
+  background-color: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 1.25rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.navbar-mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.navbar-mobile-nav-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  color: #d1d5db;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.navbar-mobile-nav-link:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-mobile-search {
+  position: relative;
+}
+
+.navbar-mobile-search-input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.25rem;
+  border: 1px solid #4b5563;
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.navbar-mobile-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  width: 16px;
+  height: 16px;
+}
+
+.navbar-mobile-suggestions {
+  margin-top: 0.5rem;
+  background-color: #1f2937;
+  border: 1px solid #4b5563;
+  border-radius: 0.5rem;
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.navbar-mobile-suggestion-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  color: white;
+  font-size: 0.875rem;
+}
+
+.navbar-mobile-suggestion-item:hover {
+  background-color: #0d9488;
+}
+
+.navbar-mobile-auth {
+  padding-top: 1rem;
+  border-top: 1px solid rgba(31, 41, 55, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.navbar-mobile-auth-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.navbar-mobile-auth-link-signin {
+  color: #d1d5db;
+}
+
+.navbar-mobile-auth-link-signin:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.navbar-mobile-auth-link-logout {
+  color: #ef4444;
+}
+
+.navbar-mobile-auth-link-logout:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
