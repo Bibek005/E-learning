@@ -1,4 +1,5 @@
 // src/context/AuthContext.jsx
+// @refresh reset
 import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,7 +8,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true); // Wait for localStorage check
+  const [loading, setLoading] = useState(true); // For checking localStorage on app load
+  const [authLoading, setAuthLoading] = useState(false); // For login/logout requests
   const navigate = useNavigate();
 
   // Check if user is logged in on app load
@@ -19,22 +21,20 @@ export const AuthProvider = ({ children }) => {
         setUser(parsedUser);
         setIsLoggedIn(true);
       } catch (err) {
-        console.error("Failed to parse user from localStorage");
+        console.error("Failed to parse user:", err);
         localStorage.removeItem("user");
       }
     }
-    setLoading(false); // Stop loading
+    setLoading(false);
   }, []);
 
-  // Login function — call API to validate with MySQL
+  // Login function
   const login = async (email, password) => {
-    setLoading(true);
+    setAuthLoading(true);
     try {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
@@ -44,54 +44,64 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || "Login failed");
       }
 
-      // Save user from DB (matches your `users` table)
+      localStorage.setItem('token', data.token);
+
+      // Save user from DB
       const userData = {
-        user_id: data.user_id,
-        name: data.name,
-        email: data.email,
-        role: data.role,
-        profile_pic: data.profile_pic,
+        user_id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        profile_pic: data.user.profile_pic || null,
       };
 
       setUser(userData);
       setIsLoggedIn(true);
-
-      // Save to localStorage
       localStorage.setItem("user", JSON.stringify(userData));
 
+      console.log('✅ Token saved:', data.token);
+      console.log('✅ User saved:', userData);
+
       // Redirect based on role
-      if (data.role === "admin") {
-        navigate("/admin");
-      } else if (data.role === "lecturer") {
-        navigate("/lecturer/dashboard");
-      } else if (data.role === "student") {
+      if (data.user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else if (data.user.role === "teacher") {
+        navigate("/teacher/dashboard");
+      } else if (data.user.role === "student") {
         navigate("/student/dashboard");
-      } else {
-        navigate("/");
       }
     } catch (err) {
-      throw new Error(err.message);
+      console.error("Login error:", err);
+      throw err;
     } finally {
-      setLoading(false);
+      setAuthLoading(false);
     }
   };
 
   // Logout function
   const logout = () => {
+    localStorage.removeItem("user");
     setUser(null);
     setIsLoggedIn(false);
-    localStorage.removeItem("user");
     navigate("/login");
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoggedIn,
+        loading,
+        authLoading,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook for easy access
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
