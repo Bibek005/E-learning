@@ -1,6 +1,7 @@
-// src/sections/Hero.jsx
+
 import { useState } from "react";
 import "./Hero.css";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   const [flipped, setFlipped] = useState(false);
@@ -36,9 +37,10 @@ const Hero = () => {
         </p>
 
         <div className="hero-buttons">
-          <button className="hero-btn-primary">
+          
+          <Link to='/login' className="hero-btn-primary">
             {flipped ? "सिकाइ सुरु गर्नुहोस् (अब फेसबुक स्क्रोल गर्ने बहाना छैन!)" : "Start Learning Now"}
-          </button>
+          </Link>
           <button className="hero-btn-secondary">
             {flipped ? "मुक्त डेमो हेर्नुहोस् (झुटो भिडियो होइन, वास्तविक ज्ञान)" : "Watch Free Demo"}
           </button>
@@ -55,3 +57,4 @@ const Hero = () => {
 };
 
 export default Hero;
+
