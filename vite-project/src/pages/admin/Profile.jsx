@@ -117,7 +117,7 @@ const Profile = () => {
   // Show error if no user
   if (!user || !user.id) {
     return (
-      <div className="ml-64 p-6 pt-24 min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="m-auto p-6 pt-24 min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🚫</div>
           <h2 className="text-2xl font-bold text-red-500 mb-2">User Not Found</h2>
