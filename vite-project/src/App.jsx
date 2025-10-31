@@ -2,6 +2,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
+
+
 import Landingpage from './pages/Landingpage';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
@@ -12,15 +14,18 @@ import ManageUsers from './pages/admin/ManageUsers';
 import ManageCourses from './pages/admin/ManageCourses';
 import Profile from './pages/admin/Profile';
 
-// Teacher Pages (import them)
+// Teacher Pages
 import TeacherDashboard from './pages/teacher/Dashboard';
-import TeacherManageCourses from './pages/teacher/ManageCourses';
-import TeacherManageAssignments from './pages/teacher/ManageAssignments';
-import TeacherManageQuizzes from './pages/teacher/ManageQuizzes';
+import TeacherCourses from './pages/teacher/Courses'
 import TeacherProfile from './pages/teacher/Profile';
+import TeacherAssignments from './pages/teacher/Assignments';
+import TeacherQuizzes from './pages/teacher/Quizzes';
+import TeacherSubmissions from './pages/teacher/Submissions';
+
+
 
 function AppContent() {
-  const { user, isLoggedIn, loading } = useAuth();
+  const { user, isLoggedIn, loading, logout } = useAuth();
 
   if (loading) {
     return <div className="loading">Loading...</div>;
@@ -53,11 +58,13 @@ function AppContent() {
         {/* Teacher Routes - Protected */}
         {isLoggedIn && user?.role === 'teacher' ? (
           <>
-            <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-            <Route path="/teacher/courses" element={<TeacherManageCourses />} />
-            <Route path="/teacher/assignments" element={<TeacherManageAssignments />} />
-            <Route path="/teacher/quizzes" element={<TeacherManageQuizzes />} />
-            <Route path="/teacher/profile" element={<TeacherProfile user={user} />} />
+                   <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
+            <Route path="/teacher/courses" element={<TeacherCourses />} />
+            <Route path="/teacher/assignments" element={<TeacherAssignments />} />
+            <Route path="/teacher/quizzes" element={<TeacherQuizzes />} />
+            <Route path="/teacher/submissions" element={<TeacherSubmissions />} />
+            <Route path="/teacher/profile" element={<TeacherProfile />} />
+            {/* <Route path="/logout" element={<Logout />} /> */}
           </>
         ) : null}
 

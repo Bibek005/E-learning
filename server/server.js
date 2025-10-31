@@ -13,13 +13,21 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'elearning_db'
+  database: 'elearning_db',
+    waitForConnections: true,
 });
 
 db.connect(err => {
   if (err) throw err;
   console.log('MySQL Connected...');
 });
+
+
+// const app = express.app();
+// const db = require('../config/db'); // Your MySQL connection
+
+
+
 
 const JWT_SECRET = 'your_jwt_secret_key';
 
@@ -268,251 +276,418 @@ app.delete('/api/admin/courses/:id', authenticateToken, (req, res) => {
     });
   });
 });
+
+
 // ======================
 // TEACHER ROUTES
 // ======================
+// routes/teacherRoutes.js
 
-// Teacher Dashboard Stats
-app.get('/api/teacher/dashboard', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
+// Middleware to verify teacher role
+const verifyTeacher = (req, res, next) => {
+  if (req.user.role !== 'teacher') {
+    return res.status(403).json({ error: 'Access denied. Teacher role required.' });
+  }
+  next();
+};
 
-  const teacherId = req.user.id;
 
-  const coursesSql = 'SELECT COUNT(*) as total FROM courses WHERE teacher_id = ?';
-  const assignmentsSql = 'SELECT COUNT(*) as total FROM assignments a JOIN courses c ON a.course_id = c.id WHERE c.teacher_id = ?';
-  const quizzesSql = 'SELECT COUNT(*) as total FROM quizzes q JOIN courses c ON q.course_id = c.id WHERE c.teacher_id = ?';
-  const submissionsSql = `
-    SELECT COUNT(*) as total 
-    FROM submissions s 
-    JOIN assignments a ON s.assignment_id = a.id 
-    JOIN courses c ON a.course_id = c.id 
-    WHERE c.teacher_id = ?
-  `;
-  const quizAttemptsSql = `
-    SELECT COUNT(*) as total 
-    FROM quiz_attempts qa 
-    JOIN quizzes q ON qa.quiz_id = q.id 
-    JOIN courses c ON q.course_id = c.id 
-    WHERE c.teacher_id = ?
-  `;
+// GET: Teacher Dashboard Stats
+app.get('/dashboard', verifyTeacher, async (req, res) => {
+  try {
+    const teacherId = req.user.id;
 
-  Promise.all([
-    new Promise((resolve, reject) => {
-      db.query(coursesSql, [teacherId], (err, results) => {
-        if (err) reject(err);
-        else resolve(results[0].total);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(assignmentsSql, [teacherId], (err, results) => {
-        if (err) reject(err);
-        else resolve(results[0].total);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(quizzesSql, [teacherId], (err, results) => {
-        if (err) reject(err);
-        else resolve(results[0].total);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(submissionsSql, [teacherId], (err, results) => {
-        if (err) reject(err);
-        else resolve(results[0].total);
-      });
-    }),
-    new Promise((resolve, reject) => {
-      db.query(quizAttemptsSql, [teacherId], (err, results) => {
-        if (err) reject(err);
-        else resolve(results[0].total);
-      });
-    })
-  ])
-    .then(([courses, assignments, quizzes, submissions, quizAttempts]) => {
-      res.json({
-        courses,
-        assignments,
-        quizzes,
-        submissions,
-        quizAttempts
-      });
-    })
-    .catch(err => res.status(500).json({ error: err.message }));
+    // Total courses
+    const [courses] = await db.execute(
+      'SELECT COUNT(*) as count FROM courses WHERE teacher_id = ?',
+      [teacherId]
+    );
+
+    // Total students enrolled in teacher's courses
+    const [students] = await db.execute(`
+      SELECT COUNT(DISTINCT e.student_id) as count 
+      FROM enrollments e 
+      JOIN courses c ON e.course_id = c.id 
+      WHERE c.teacher_id = ?
+    `, [teacherId]);
+
+    // Pending submissions (not graded)
+    const [pending] = await db.execute(`
+      SELECT COUNT(*) as count 
+      FROM submissions s 
+      JOIN assignments a ON s.assignment_id = a.id 
+      WHERE a.course_id IN (SELECT id FROM courses WHERE teacher_id = ?) AND s.status != 'graded'
+    `, [teacherId]);
+
+    // Average quiz score
+    const [avgScore] = await db.execute(`
+      SELECT AVG(score) as avg_score 
+      FROM quiz_attempts qa 
+      JOIN quizzes q ON qa.quiz_id = q.id 
+      WHERE q.course_id IN (SELECT id FROM courses WHERE teacher_id = ?)
+    `, [teacherId]);
+
+    res.json({
+      totalCourses: courses[0].count,
+      totalStudents: students[0].count,
+      pendingSubmissions: pending[0].count,
+      avgQuizScore: avgScore[0].avg_score ? Math.round(avgScore[0].avg_score) : 0,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Teacher Profile
-app.get('/api/teacher/profile', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
-
-  const sql = 'SELECT id, name, email, role FROM users WHERE id = ?';
-  db.query(sql, [req.user.id], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (results.length === 0) return res.status(404).json({ error: 'User not found' });
-    res.json(results[0]);
-  });
+// GET: Teacher's Courses
+app.get('/courses', verifyTeacher, async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const [courses] = await db.execute(
+      'SELECT id, title, description, status, created_at FROM courses WHERE teacher_id = ? ORDER BY created_at DESC',
+      [teacherId]
+    );
+    res.json(courses);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-app.put('/api/teacher/profile', authenticateToken, async (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
 
-  const { name } = req.body;
-  const sql = 'UPDATE users SET name = ? WHERE id = ?';
-  db.query(sql, [name, req.user.id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Profile updated' });
-  });
+
+// POST: Create Course
+app.post('/courses', verifyTeacher, async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    const teacherId = req.user.id;
+
+    const [result] = await db.execute(
+      'INSERT INTO courses (title, description, teacher_id, created_at, status) VALUES (?, ?, ?, NOW(), ?)',
+      [title, description, teacherId, 'active']
+    );
+
+    const [newCourse] = await db.execute(
+      'SELECT id, title, description, status, created_at FROM courses WHERE id = ?',
+      [result.insertId]
+    );
+
+    res.status(201).json(newCourse[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Get Teacher's Courses
-app.get('/api/teacher/courses', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
+// DELETE: Delete Course
+app.delete('/courses/:id', verifyTeacher, async (req, res) => {
+  try {
+    const courseId = req.params.id;
+    const teacherId = req.user.id;
 
-  const sql = 'SELECT id, title, description FROM courses WHERE teacher_id = ?';
-  db.query(sql, [req.user.id], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+    // Verify course belongs to teacher
+    const [course] = await db.execute(
+      'SELECT id FROM courses WHERE id = ? AND teacher_id = ?',
+      [courseId, teacherId]
+    );
+
+    if (course.length === 0) {
+      return res.status(404).json({ error: 'Course not found or access denied' });
+    }
+
+    await db.execute('DELETE FROM courses WHERE id = ?', [courseId]);
+    res.json({ message: 'Course deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Create Course
-app.post('/api/teacher/courses', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
-
-  const { title, description } = req.body;
-  const sql = 'INSERT INTO courses (title, description, teacher_id) VALUES (?, ?, ?)';
-  db.query(sql, [title, description, req.user.id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Course created', courseId: result.insertId });
-  });
+// GET: Teacher's Assignments
+app.get('/assignments', verifyTeacher, async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const [assignments] = await db.execute(`
+      SELECT a.id, a.title, a.description, a.due_date, a.created_at, c.title as course_title
+      FROM assignments a
+      JOIN courses c ON a.course_id = c.id
+      WHERE c.teacher_id = ?
+      ORDER BY a.created_at DESC
+    `, [teacherId]);
+    res.json(assignments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Get Course Enrollments
-app.get('/api/teacher/courses/:courseId/enrollments', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
+// POST: Create Assignment
+app.post('/assignments', verifyTeacher, async (req, res) => {
+  try {
+    const { course_id, title, description, due_date } = req.body;
+    const teacherId = req.user.id;
 
-  const sql = `
-    SELECT u.id, u.name, u.email, e.enrolled_at
-    FROM enrollments e
-    JOIN users u ON e.student_id = u.id
-    WHERE e.course_id = ?
-  `;
-  db.query(sql, [req.params.courseId], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+    // Verify course belongs to teacher
+    const [course] = await db.execute(
+      'SELECT id FROM courses WHERE id = ? AND teacher_id = ?',
+      [course_id, teacherId]
+    );
+
+    if (course.length === 0) {
+      return res.status(404).json({ error: 'Course not found or access denied' });
+    }
+
+    const [result] = await db.execute(
+      'INSERT INTO assignments (course_id, title, description, due_date, created_at) VALUES (?, ?, ?, ?, NOW())',
+      [course_id, title, description, due_date]
+    );
+
+    const [newAssignment] = await db.execute(`
+      SELECT a.id, a.title, a.description, a.due_date, a.created_at, c.title as course_title
+      FROM assignments a
+      JOIN courses c ON a.course_id = c.id
+      WHERE a.id = ?
+    `, [result.insertId]);
+
+    res.status(201).json(newAssignment[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Get Teacher's Assignments
-app.get('/api/teacher/assignments', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
+// DELETE: Delete Assignment
+app.delete('/assignments/:id', verifyTeacher, async (req, res) => {
+  try {
+    const assignmentId = req.params.id;
+    const teacherId = req.user.id;
 
-  const sql = `
-    SELECT a.id, a.title, a.description, a.due_date, c.title as course_title
-    FROM assignments a
-    JOIN courses c ON a.course_id = c.id
-    WHERE c.teacher_id = ?
-  `;
-  db.query(sql, [req.user.id], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+    // Verify assignment belongs to teacher
+    const [assignment] = await db.execute(`
+      SELECT a.id FROM assignments a
+      JOIN courses c ON a.course_id = c.id
+      WHERE a.id = ? AND c.teacher_id = ?
+    `, [assignmentId, teacherId]);
+
+    if (assignment.length === 0) {
+      return res.status(404).json({ error: 'Assignment not found or access denied' });
+    }
+
+    await db.execute('DELETE FROM assignments WHERE id = ?', [assignmentId]);
+    res.json({ message: 'Assignment deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Create Assignment
-app.post('/api/teacher/assignments', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
-
-  const { course_id, title, description, due_date } = req.body;
-  const sql = 'INSERT INTO assignments (course_id, title, description, due_date) VALUES (?, ?, ?, ?)';
-  db.query(sql, [course_id, title, description, due_date], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Assignment created', assignmentId: result.insertId });
-  });
+// GET: Teacher's Quizzes
+app.get('/quizzes', verifyTeacher, async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const [quizzes] = await db.execute(`
+      SELECT q.id, q.title, q.time_limit, q.created_at, c.title as course_title
+      FROM quizzes q
+      JOIN courses c ON q.course_id = c.id
+      WHERE c.teacher_id = ?
+      ORDER BY q.created_at DESC
+    `, [teacherId]);
+    res.json(quizzes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Get Assignment Submissions
-app.get('/api/teacher/assignments/:assignmentId/submissions', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
+// POST: Create Quiz with Questions
+app.post('/quizzes', verifyTeacher, async (req, res) => {
+  try {
+    const { course_id, title, time_limit, questions } = req.body;
+    const teacherId = req.user.id;
 
-  const sql = `
-    SELECT s.id, u.name as student_name, s.file_url, s.status, s.grade, s.feedback, s.submitted_at
-    FROM submissions s
-    JOIN users u ON s.student_id = u.id
-    WHERE s.assignment_id = ?
-  `;
-  db.query(sql, [req.params.assignmentId], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+    // Verify course belongs to teacher
+    const [course] = await db.execute(
+      'SELECT id FROM courses WHERE id = ? AND teacher_id = ?',
+      [course_id, teacherId]
+    );
+
+    if (course.length === 0) {
+      return res.status(404).json({ error: 'Course not found or access denied' });
+    }
+
+    // Start transaction
+    await db.beginTransaction();
+
+    // Insert quiz
+    const [quizResult] = await db.execute(
+      'INSERT INTO quizzes (course_id, title, time_limit, created_at) VALUES (?, ?, ?, NOW())',
+      [course_id, title, time_limit]
+    );
+
+    const quizId = quizResult.insertId;
+
+    // Insert questions
+    for (const q of questions) {
+      const { question_text, options, correct_answer } = q;
+      await db.execute(
+        'INSERT INTO quiz_questions (quiz_id, question_text, options, correct_answer) VALUES (?, ?, ?, ?)',
+        [quizId, question_text, JSON.stringify(options), correct_answer]
+      );
+    }
+
+    await db.commit();
+
+    // Return full quiz data
+    const [newQuiz] = await db.execute(`
+      SELECT q.id, q.title, q.time_limit, q.created_at, c.title as course_title
+      FROM quizzes q
+      JOIN courses c ON q.course_id = c.id
+      WHERE q.id = ?
+    `, [quizId]);
+
+    res.status(201).json(newQuiz[0]);
+  } catch (err) {
+    await db.rollback();
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Get Teacher's Quizzes
-app.get('/api/teacher/quizzes', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
+// DELETE: Delete Quiz
+app.delete('/quizzes/:id', verifyTeacher, async (req, res) => {
+  try {
+    const quizId = req.params.id;
+    const teacherId = req.user.id;
 
-  const sql = `
-    SELECT q.id, q.title, q.description, q.time_limit, c.title as course_title
-    FROM quizzes q
-    JOIN courses c ON q.course_id = c.id
-    WHERE c.teacher_id = ?
-  `;
-  db.query(sql, [req.user.id], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+    // Verify quiz belongs to teacher
+    const [quiz] = await db.execute(`
+      SELECT q.id FROM quizzes q
+      JOIN courses c ON q.course_id = c.id
+      WHERE q.id = ? AND c.teacher_id = ?
+    `, [quizId, teacherId]);
+
+    if (quiz.length === 0) {
+      return res.status(404).json({ error: 'Quiz not found or access denied' });
+    }
+
+    await db.execute('DELETE FROM quizzes WHERE id = ?', [quizId]);
+    res.json({ message: 'Quiz deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Create Quiz
-app.post('/api/teacher/quizzes', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
-
-  const { course_id, title, description, time_limit } = req.body;
-  // For simplicity, we'll store questions as JSON in a TEXT column later
-  const sql = 'INSERT INTO quizzes (course_id, title, description, time_limit) VALUES (?, ?, ?, ?)';
-  db.query(sql, [course_id, title, description, time_limit], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'Quiz created', quizId: result.insertId });
-  });
+// GET: Teacher's Submissions (to evaluate)
+app.get('/submissions', verifyTeacher, async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const [submissions] = await db.execute(`
+      SELECT 
+        s.id, s.assignment_id, s.student_id, s.file_url, s.status, s.grade, s.feedback, s.submitted_at,
+        a.title as assignment_title,
+        u.name as student_name
+      FROM submissions s
+      JOIN assignments a ON s.assignment_id = a.id
+      JOIN courses c ON a.course_id = c.id
+      JOIN users u ON s.student_id = u.id
+      WHERE c.teacher_id = ?
+      ORDER BY s.submitted_at DESC
+    `, [teacherId]);
+    res.json(submissions);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Get Quiz Attempts
-app.get('/api/teacher/quizzes/:quizId/attempts', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
+// PUT: Evaluate Submission
+app.put('/submissions/:id', verifyTeacher, async (req, res) => {
+  try {
+    const submissionId = req.params.id;
+    const { grade, feedback } = req.body;
+    const teacherId = req.user.id;
 
-  const sql = `
-    SELECT qa.id, u.name as student_name, qa.score, qa.total_questions, qa.completed_at
-    FROM quiz_attempts qa
-    JOIN users u ON qa.student_id = u.id
-    WHERE qa.quiz_id = ?
-  `;
-  db.query(sql, [req.params.quizId], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+    // Verify submission belongs to teacher's course
+    const [submission] = await db.execute(`
+      SELECT s.id FROM submissions s
+      JOIN assignments a ON s.assignment_id = a.id
+      JOIN courses c ON a.course_id = c.id
+      WHERE s.id = ? AND c.teacher_id = ?
+    `, [submissionId, teacherId]);
+
+    if (submission.length === 0) {
+      return res.status(404).json({ error: 'Submission not found or access denied' });
+    }
+
+    await db.execute(
+      'UPDATE submissions SET grade = ?, feedback = ?, status = "graded" WHERE id = ?',
+      [grade, feedback, submissionId]
+    );
+
+    const [updated] = await db.execute(`
+      SELECT 
+        s.id, s.assignment_id, s.student_id, s.file_url, s.status, s.grade, s.feedback, s.submitted_at,
+        a.title as assignment_title,
+        u.name as student_name
+      FROM submissions s
+      JOIN assignments a ON s.assignment_id = a.id
+      JOIN courses c ON a.course_id = c.id
+      JOIN users u ON s.student_id = u.id
+      WHERE s.id = ?
+    `, [submissionId]);
+
+    res.json(updated[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Recent Activity for Teacher
-app.get('/api/teacher/activity', authenticateToken, (req, res) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Access denied' });
-
-  const sql = `
-    SELECT 
-      sl.timestamp,
-      u.name as user_name,
-      sl.action,
-      c.title as course_title
-    FROM system_logs sl
-    LEFT JOIN users u ON sl.user_id = u.id
-    LEFT JOIN courses c ON sl.details LIKE CONCAT('%course_id:', c.id, '%')
-    WHERE c.teacher_id = ? OR sl.user_id = ?
-    ORDER BY sl.timestamp DESC
-    LIMIT 10
-  `;
-  db.query(sql, [req.user.id, req.user.id], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
+// GET: Teacher Profile
+app.get('/profile', verifyTeacher, async (req, res) => {
+  try {
+    const teacherId = req.user.id;
+    const [user] = await db.execute(
+      'SELECT id, name, email FROM users WHERE id = ?',
+      [teacherId]
+    );
+    res.json(user[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
+
+// PUT: Update Teacher Profile
+app.put('/profile', verifyTeacher, async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const teacherId = req.user.id;
+
+    let sql = 'UPDATE users SET name = ?, email = ?';
+    let params = [name, email];
+
+    if (password) {
+      // Hash password before saving (you should have bcrypt setup)
+      const hashedPassword = await bcrypt.hash(password, 10);
+      sql += ', password = ?';
+      params.push(hashedPassword);
+    }
+
+    sql += ' WHERE id = ?';
+    params.push(teacherId);
+
+    await db.execute(sql, params);
+
+    res.json({ message: 'Profile updated successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// module.exports = app;
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

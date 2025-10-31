@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         console.error("Failed to parse user:", err);
         localStorage.removeItem("user");
       }
-    }
+    }``
     setLoading(false);
   }, []);
 
@@ -47,13 +47,13 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.token);
 
       // Save user from DB
-      const userData = {
-        user_id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        role: data.user.role,
-        profile_pic: data.user.profile_pic || null,
-      };
+     const userData = {
+  id: data.user.id,   
+  name: data.user.name,
+  email: data.user.email,
+  role: data.user.role,
+  profile_pic: data.user.profile_pic || null,
+};
 
       setUser(userData);
       setIsLoggedIn(true);
