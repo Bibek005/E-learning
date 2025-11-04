@@ -107,13 +107,13 @@ const Navbar = () => {
 
   const userItems = isLoggedIn
     ? [
-        {
-          title: "Profile",
-          icon: <IoPersonCircleOutline size={20} />,
-          path: "/profile",
-          className: "navbar-mobile-auth-link-signin",
-          linkClass: "flex items-center gap-2",
-        },
+        // {
+        //   title: "Profile",
+        //   icon: <IoPersonCircleOutline size={20} />,
+        //   path: "/profile",
+        //   className: "navbar-mobile-auth-link-signin",
+        //   linkClass: "flex items-center gap-2",
+        // },
         {
           title: "Logout",
           icon: <AiOutlineClose size={20} />,

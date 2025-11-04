@@ -1,26 +1,29 @@
-// components/Sidebar.jsx
-import { useState, useEffect } from 'react';
+import { useState, useLayoutEffect } from 'react'; // ✅ useLayoutEffect
 import { useLocation, Link } from 'react-router-dom';
 
 const Sidebar = ({ userRole, userName }) => {
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(0); // start at 0
   const location = useLocation();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
+    handleResize(); // ✅ get initial width synchronously
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Define breakpoints
   const isMobile = windowWidth < 768;
   const isTablet = windowWidth >= 768 && windowWidth < 1030;
   const isDesktop = windowWidth >= 1030;
 
-  // Hide sidebar completely on mobile if desired
+  // Optional: debug
+  console.log({ windowWidth, isMobile, isTablet, isDesktop });
+
   if (isMobile) {
     return null;
   }
+
+  // ... rest of your code unchanged ...
 
   const getLinks = () => {
     switch (userRole) {
@@ -32,20 +35,25 @@ const Sidebar = ({ userRole, userName }) => {
           { name: 'Profile', path: '/admin/profile', icon: UserIcon },
           { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
         ];
-      case 'teacher':
-        return [
-          { name: 'Dashboard', path: '/teacher/dashboard', icon: HomeIcon },
-          { name: 'My Courses', path: '/teacher/courses', icon: BookOpenIcon },
-          { name: 'Profile', path: '/teacher/profile', icon: UserIcon },
-          { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
-        ];
+        case 'teacher':
+  return [
+    { name: 'Dashboard', path: '/teacher/dashboard', icon: HomeIcon },
+    { name: 'My Courses', path: '/teacher/courses', icon: BookOpenIcon },
+    { name: 'Assignments', path: '/teacher/assignments', icon: ClipboardDocumentListIcon },
+    { name: 'Quizzes', path: '/teacher/quizzes', icon: QuestionMarkCircleIcon },
+    { name: 'Submissions', path: '/teacher/submissions', icon: InboxIcon },
+    { name: 'Profile', path: '/teacher/profile', icon: UserIcon },
+    { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
+  ];
       case 'student':
-        return [
-          { name: 'Dashboard', path: '/student/dashboard', icon: HomeIcon },
-          { name: 'My Courses', path: '/student/courses', icon: BookOpenIcon },
-          { name: 'Profile', path: '/student/profile', icon: UserIcon },
-          { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
-        ];
+  return [
+    { name: 'Dashboard', path: '/student/dashboard', icon: HomeIcon },
+    { name: 'My Courses', path: '/student/courses', icon: BookOpenIcon },
+    { name: 'Assignments', path: '/student/assignments', icon: ClipboardDocumentListIcon },
+    { name: 'Quizzes', path: '/student/quizzes', icon: QuestionMarkCircleIcon },
+    { name: 'Profile', path: '/student/profile', icon: UserIcon },
+    { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
+  ];
       default:
         return [];
     }
@@ -154,6 +162,25 @@ const UserIcon = ({ className }) => (
 const ArrowLeftOnRectangleIcon = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+  </svg>
+);
+// New Icons for Teacher Panel
+const ClipboardDocumentListIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75v-.75m-9 3a2.25 2.25 0 01-2.25-2.25v-.75m13.5 0a2.25 2.25 0 012.25 2.25v.75" />
+  </svg>
+);
+
+const QuestionMarkCircleIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.327-.67.442-.745.361-1.642.558-2.559.558s-1.814-.197-2.559-.558a3.48 3.48 0 01-.67-.442c-1.172-1.025-1.172-2.687 0-3.712z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+  </svg>
+);
+
+const InboxIcon = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512c.21.422.325.885.325 1.367v4.5a2.25 2.25 0 002.25 2.25h10.5A2.25 2.25 0 0021 19.5v-4.5c0-.482.115-.945.325-1.367l.256-.512A2.25 2.25 0 0119.86 12.75h3.86m-6.75-9V3.75A2.25 2.25 0 0015 1.5h-3A2.25 2.25 0 009.75 3.75V6.75m6.75-6.75H15m-3 0H9.75m6.75 0l-1.5 6m-3-6l1.5 6" />
   </svg>
 );
 

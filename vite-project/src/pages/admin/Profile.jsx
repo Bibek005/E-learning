@@ -139,13 +139,13 @@ const Profile = () => {
         {/* Profile Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           {/* Cover/Header Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8 text-white relative">
-            <div className="flex flex-col md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8 text-white relative ">
+            <div className="flex flex-col align-items-center justify-content-ce md:flex-row items-center md:items-end space-y-4 md:space-y-0 md:space-x-6">
               {/* Profile Picture */}
               <div className="relative">
                 <div className="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center border-4 border-white">
                   <span className="text-3xl font-bold">
-                    {profile?.name?.charAt(0).toUpperCase() || user.name?.charAt(0).toUpperCase() || '?'}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5e5c64" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-check-icon lucide-user-check"><path d="m16 11 2 2 4-4"/><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                   </span>
                 </div>
                 {isEditing && (
@@ -174,10 +174,10 @@ const Profile = () => {
                     profile?.name || user.name || 'Loading...'
                   )}
                 </h2>
-                <p className="text-blue-100 text-lg capitalize mt-1">
+                <p className="text-black text-lg capitalize mt-1">
                   {user.role} Account
                 </p>
-                <p className="text-blue-200 text-sm">
+                <p className="text-black text-sm">
                   Member since {profile?.created_at 
                     ? new Date(profile.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
@@ -321,8 +321,7 @@ const Profile = () => {
                 </div>
               </div>
             </div>
-
-            {/* Security Section */}
+{/* 
             <div className="mt-8 pt-6 border-t border-gray-200">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">🔒 Security</h3>
               <div className="bg-gray-50 p-4 rounded-lg">
@@ -336,7 +335,7 @@ const Profile = () => {
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
