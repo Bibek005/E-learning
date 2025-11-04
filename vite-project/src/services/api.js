@@ -1,213 +1,3 @@
-// // src/services/api.js
-// const API_BASE = 'http://localhost:5000/api';
-
-// export const loginApi = async (credentials) => {
-//   const res = await fetch(`${API_BASE}/auth/login`, {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify(credentials)
-//   });
-//   if (!res.ok) throw new Error('Login failed');
-//   return res.json();
-// };
-
-// // Admin APIs
-// export const getAdminDashboard = async (token) => {
-//   const res = await fetch(`${API_BASE}/admin/dashboard`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load dashboard');
-//   return res.json();
-// };
-
-// export const getAdminProfile = async (adminId, token) => {
-//   const res = await fetch(`${API_BASE}/admin/profile/${adminId}`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load profile');
-//   return res.json();
-// };
-
-// export const getAdminUsers = async (token) => {
-//   const res = await fetch(`${API_BASE}/admin/users`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load users');
-//   return res.json();
-// };
-
-// export const createAdminUser = async (userData, token) => {
-//   const res = await fetch(`${API_BASE}/admin/users`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${token}`
-//     },
-//     body: JSON.stringify(userData)
-//   });
-//   if (!res.ok) throw new Error('Failed to create user');
-//   return res.json();
-// };
-
-// export const updateAdminUser = async (userId, userData, token) => {
-//   const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
-//     method: 'PUT',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${token}`
-//     },
-//     body: JSON.stringify(userData)
-//   });
-//   if (!res.ok) throw new Error('Failed to update user');
-//   return res.json();
-// };
-
-// export const deleteAdminUser = async (userId, token) => {
-//   const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
-//     method: 'DELETE',
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to delete user');
-//   return res.json();
-// };
-
-// export const getAdminLogs = async (token) => {
-//   const res = await fetch(`${API_BASE}/admin/logs`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load logs');
-//   return res.json();
-// };
-
-// // Teacher APIs
-// export const getTeacherDashboard = async (token) => {
-//   const res = await fetch(`${API_BASE}/teacher/dashboard`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load teacher dashboard');
-//   return res.json();
-// };
-
-// export const getTeacherProfile = async (token) => {
-//   const res = await fetch(`${API_BASE}/teacher/profile`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load profile');
-//   return res.json();
-// };
-
-// export const updateTeacherProfile = async (data, token) => {
-//   const res = await fetch(`${API_BASE}/teacher/profile`, {
-//     method: 'PUT',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${token}`
-//     },
-//     body: JSON.stringify(data)
-//   });
-//   if (!res.ok) throw new Error('Failed to update profile');
-//   return res.json();
-// };
-
-// export const getTeacherCourses = async (token) => {
-//   const res = await fetch(`${API_BASE}/teacher/courses`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load courses');
-//   return res.json();
-// };
-
-// export const createTeacherCourse = async (courseData, token) => {
-//   const res = await fetch(`${API_BASE}/teacher/courses`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${token}`
-//     },
-//     body: JSON.stringify(courseData)
-//   });
-//   if (!res.ok) throw new Error('Failed to create course');
-//   return res.json();
-// };
-
-// export const getCourseEnrollments = async (courseId, token) => {
-//   const res = await fetch(`${API_BASE}/teacher/courses/${courseId}/enrollments`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load enrollments');
-//   return res.json();
-// };
-
-// export const getTeacherAssignments = async (token) => {
-//   const res = await fetch(`${API_BASE}/teacher/assignments`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load assignments');
-//   return res.json();
-// };
-
-// export const createTeacherAssignment = async (assignmentData, token) => {
-//   const res = await fetch(`${API_BASE}/teacher/assignments`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${token}`
-//     },
-//     body: JSON.stringify(assignmentData)
-//   });
-//   if (!res.ok) throw new Error('Failed to create assignment');
-//   return res.json();
-// };
-
-// export const getAssignmentSubmissions = async (assignmentId, token) => {
-//   const res = await fetch(`${API_BASE}/teacher/assignments/${assignmentId}/submissions`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load submissions');
-//   return res.json();
-// };
-
-// export const getTeacherQuizzes = async (token) => {
-//   const res = await fetch(`${API_BASE}/teacher/quizzes`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load quizzes');
-//   return res.json();
-// };
-
-// export const createTeacherQuiz = async (quizData, token) => {
-//   const res = await fetch(`${API_BASE}/teacher/quizzes`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'Authorization': `Bearer ${token}`
-//     },
-//     body: JSON.stringify(quizData)
-//   });
-//   if (!res.ok) throw new Error('Failed to create quiz');
-//   return res.json();
-// };
-
-// export const getQuizAttempts = async (quizId, token) => {
-//   const res = await fetch(`${API_BASE}/teacher/quizzes/${quizId}/attempts`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load quiz attempts');
-//   return res.json();
-// };
-
-// export const getTeacherActivity = async (token) => {
-//   const res = await fetch(`${API_BASE}/teacher/activity`, {
-//     headers: { 'Authorization': `Bearer ${token}` }
-//   });
-//   if (!res.ok) throw new Error('Failed to load activity');
-//   return res.json();
-// };
-
-
-
-
-
 
 
 
@@ -324,15 +114,35 @@ export const getTeacherDashboard = async () => {
   return response.data;
 };
 
+
+// export const getTeacherProfile = async (teacherId) => {
+//   const response = await api.get(`/teacher/profile/${teacherId}`);
+//   return response.data;
+// };
+
+// export const updateTeacherProfile = async (userId, userData) => {
+//   const response = await api.put(`/teacher/profile/${teacherId}`, userdata);
+//   return response.data;
+// };
+
+
+
+// ✅ Correct
 export const getTeacherProfile = async () => {
   const response = await api.get('/teacher/profile');
   return response.data;
 };
 
-export const updateTeacherProfile = async (data) => {
-  const response = await api.put('/teacher/profile', data);
+export const updateTeacherProfile = async (userData) => {
+  const response = await api.put('/teacher/profile', userData);
   return response.data;
 };
+
+
+export const deleteTeacherCourse = async (courseId) => {
+  const response = await api.delete(`/teacher/courses/${courseId}`);
+  return response.data;
+}; 
 
 export const getTeacherCourses = async () => {
   const response = await api.get('/teacher/courses');
@@ -383,6 +193,8 @@ export const getTeacherActivity = async () => {
   const response = await api.get('/teacher/activity');
   return response.data;
 };
+
+
 
 // Export axios instance for direct use if needed
 export default api;

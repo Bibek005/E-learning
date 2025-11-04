@@ -28,8 +28,9 @@ db.connect(err => {
 
 
 
+// node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"   to generate the jwt token
 
-const JWT_SECRET = 'your_jwt_secret_key';
+const JWT_SECRET = 'f310747d327a47f3f8a9de292b15a41fb98f5e0fb1f9537fac95ee069e7c88a581e25519f2242b8e93fa3fda7ee653bcf3a28482e3ddf7ad1958c9e9cc428d39';
 
 // Middleware
 const authenticateToken = (req, res, next) => {
@@ -293,7 +294,7 @@ const verifyTeacher = (req, res, next) => {
 
 
 // GET: Teacher Dashboard Stats
-app.get('/dashboard', verifyTeacher, async (req, res) => {
+app.get('/api/teacher/dashboard', verifyTeacher, async (req, res) => {
   try {
     const teacherId = req.user.id;
 
@@ -340,7 +341,7 @@ app.get('/dashboard', verifyTeacher, async (req, res) => {
 });
 
 // GET: Teacher's Courses
-app.get('/courses', verifyTeacher, async (req, res) => {
+app.get('/api/teacher/courses', verifyTeacher, async (req, res) => {
   try {
     const teacherId = req.user.id;
     const [courses] = await db.execute(
@@ -357,7 +358,7 @@ app.get('/courses', verifyTeacher, async (req, res) => {
 
 
 // POST: Create Course
-app.post('/courses', verifyTeacher, async (req, res) => {
+app.post('/api/teacher/courses', verifyTeacher, async (req, res) => {
   try {
     const { title, description } = req.body;
     const teacherId = req.user.id;
@@ -380,7 +381,7 @@ app.post('/courses', verifyTeacher, async (req, res) => {
 });
 
 // DELETE: Delete Course
-app.delete('/courses/:id', verifyTeacher, async (req, res) => {
+app.delete('/api/teacher/courses/:id', verifyTeacher, async (req, res) => {
   try {
     const courseId = req.params.id;
     const teacherId = req.user.id;
@@ -404,7 +405,7 @@ app.delete('/courses/:id', verifyTeacher, async (req, res) => {
 });
 
 // GET: Teacher's Assignments
-app.get('/assignments', verifyTeacher, async (req, res) => {
+app.get('/api/teacher/assignments', verifyTeacher, async (req, res) => {
   try {
     const teacherId = req.user.id;
     const [assignments] = await db.execute(`
@@ -422,7 +423,7 @@ app.get('/assignments', verifyTeacher, async (req, res) => {
 });
 
 // POST: Create Assignment
-app.post('/assignments', verifyTeacher, async (req, res) => {
+app.post('/api/teacher/assignments', verifyTeacher, async (req, res) => {
   try {
     const { course_id, title, description, due_date } = req.body;
     const teacherId = req.user.id;
@@ -457,7 +458,7 @@ app.post('/assignments', verifyTeacher, async (req, res) => {
 });
 
 // DELETE: Delete Assignment
-app.delete('/assignments/:id', verifyTeacher, async (req, res) => {
+app.delete('/api/teacher/assignments/:id', verifyTeacher, async (req, res) => {
   try {
     const assignmentId = req.params.id;
     const teacherId = req.user.id;
@@ -482,7 +483,7 @@ app.delete('/assignments/:id', verifyTeacher, async (req, res) => {
 });
 
 // GET: Teacher's Quizzes
-app.get('/quizzes', verifyTeacher, async (req, res) => {
+app.get('/api/teacher/quizzes', verifyTeacher, async (req, res) => {
   try {
     const teacherId = req.user.id;
     const [quizzes] = await db.execute(`
@@ -500,7 +501,7 @@ app.get('/quizzes', verifyTeacher, async (req, res) => {
 });
 
 // POST: Create Quiz with Questions
-app.post('/quizzes', verifyTeacher, async (req, res) => {
+app.post('/api/teacher/quizzes', verifyTeacher, async (req, res) => {
   try {
     const { course_id, title, time_limit, questions } = req.body;
     const teacherId = req.user.id;
@@ -554,7 +555,7 @@ app.post('/quizzes', verifyTeacher, async (req, res) => {
 });
 
 // DELETE: Delete Quiz
-app.delete('/quizzes/:id', verifyTeacher, async (req, res) => {
+app.delete('/api/teacher/quizzes/:id', verifyTeacher, async (req, res) => {
   try {
     const quizId = req.params.id;
     const teacherId = req.user.id;
@@ -579,7 +580,7 @@ app.delete('/quizzes/:id', verifyTeacher, async (req, res) => {
 });
 
 // GET: Teacher's Submissions (to evaluate)
-app.get('/submissions', verifyTeacher, async (req, res) => {
+app.get('/api/teacher/submissions', verifyTeacher, async (req, res) => {
   try {
     const teacherId = req.user.id;
     const [submissions] = await db.execute(`
@@ -602,7 +603,7 @@ app.get('/submissions', verifyTeacher, async (req, res) => {
 });
 
 // PUT: Evaluate Submission
-app.put('/submissions/:id', verifyTeacher, async (req, res) => {
+app.put('/api/teacher/submissions/:id', verifyTeacher, async (req, res) => {
   try {
     const submissionId = req.params.id;
     const { grade, feedback } = req.body;
@@ -643,9 +644,29 @@ app.put('/submissions/:id', verifyTeacher, async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+// GET teacher profile
+// app.get('/api/teacher/profile', authenticateToken, verifyTeacher, async (req, res) => {
+//   try {
+//     const [user] = await db.execute(
+//       'SELECT id, name, email, created_at FROM users WHERE id = ?',
+//       [req.user.id]
+//     );
+//     if (user.length === 0) return res.status(404).json({ error: 'Teacher not found' });
+//     res.json(user[0]);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// });
+
+// // PUT update profile
+// app.put('/api/teacher/profile', authenticateToken, verifyTeacher, async (req, res) => {
+//   const { name, email, password } = req.body;
+//   // ... (update logic with bcrypt if password provided)
+// });
 
 // GET: Teacher Profile
-app.get('/profile', verifyTeacher, async (req, res) => {
+app.get('/api/teacher/profile', authenticateToken, verifyTeacher, async (req, res) => {
   try {
     const teacherId = req.user.id;
     const [user] = await db.execute(
@@ -660,7 +681,7 @@ app.get('/profile', verifyTeacher, async (req, res) => {
 });
 
 // PUT: Update Teacher Profile
-app.put('/profile', verifyTeacher, async (req, res) => {
+app.get('/api/teacher/profile', authenticateToken, verifyTeacher, async (req, res) => {
   try {
     const { name, email, password } = req.body;
     const teacherId = req.user.id;
