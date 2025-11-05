@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/authMiddleware');
-const { verifyRole } = require('../middleware/roleMiddleware');
+const verifyRole = require('../middleware/roleMiddleware'); // ✅ correct import
 const { getDashboardStats } = require('../controllers/adminController');
 
 router.get('/dashboard', authenticateToken, verifyRole('admin'), getDashboardStats);

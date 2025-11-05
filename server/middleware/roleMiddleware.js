@@ -2,19 +2,18 @@
 // server/middleware/roleMiddleware.js
 
 
-// ✅ roleMiddleware.js
-// Restricts routes based on the user's role
+// middleware/roleMiddleware.js
 
-module.exports = function (...allowedRoles) {
+function verifyRole(role) {
   return (req, res, next) => {
-    try {
-      const userRole = req.user.role; // extracted from JWT in authMiddleware
-      if (!allowedRoles.includes(userRole)) {
-        return res.status(403).json({ message: "Access denied: Insufficient privileges" });
-      }
-      next();
-    } catch (error) {
-      return res.status(500).json({ message: "Role check failed", error: error.message });
+    if (!req.user) {
+      return res.status(401).json({ message: 'Not authenticated' });
     }
+    if (req.user.role !== role) {
+      return res.status(403).json({ message: `Access denied. Only ${role}s can perform this action.` });
+    }
+    next();
   };
-};
+}
+
+module.exports = verifyRole;

@@ -22,9 +22,13 @@ app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/assignments', assignmentRoutes);
 app.use('/api/quizzes', quizRoutes);
-app.use('/api/materials', materialRoutes);
+// app.use('/api/materials', materialRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/admin', adminRoutes);
+
+app.use('/api/materials', require('./routes/materialRoutes'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // so file URLs are served
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
