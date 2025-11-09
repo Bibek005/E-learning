@@ -16,7 +16,6 @@ exports.register = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -28,8 +27,20 @@ exports.login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
-    res.json({ token, role: user.role, name: user.name });
+
+    // ✅ wrap user info in 'user' object
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profile_pic: user.profile_pic || null
+      }
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+

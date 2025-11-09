@@ -28,55 +28,52 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Login function
-  const login = async (email, password) => {
-    setAuthLoading(true);
-    try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+// Login function
+const login = async (email, password) => {
+  setAuthLoading(true);
+  try {
+    const response = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      localStorage.setItem('token', data.token);
-
-      // Save user from DB
-     const userData = {
-  id: data.user.id,   
-  name: data.user.name,
-  email: data.user.email,
-  role: data.user.role,
-  profile_pic: data.user.profile_pic || null,
-};
-
-      setUser(userData);
-      setIsLoggedIn(true);
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      console.log('✅ Token saved:', data.token);
-      console.log('✅ User saved:', userData);
-
-      // Redirect based on role
-      if (data.user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else if (data.user.role === "teacher") {
-        navigate("/teacher/dashboard");
-      } else if (data.user.role === "student") {
-        navigate("/student/dashboard");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      throw err;
-    } finally {
-      setAuthLoading(false);
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed");
     }
-  };
+
+    // Save token
+    localStorage.setItem("token", data.token);
+
+    // Save user info from backend
+    const userData = data.user; // backend now sends { user: {...}, token: '...' }
+
+    setUser(userData);
+    setIsLoggedIn(true);
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    console.log("✅ Token saved:", data.token);
+    console.log("✅ User saved:", userData);
+
+    // Redirect based on role
+    if (userData.role === "admin") {
+      navigate("/admin/dashboard");
+    } else if (userData.role === "teacher") {
+      navigate("/teacher/dashboard");
+    } else if (userData.role === "student") {
+      navigate("/student/dashboard");
+    }
+
+    return userData; // optional if you need it elsewhere
+  } catch (err) {
+    console.error("Login error:", err);
+    throw err;
+  } finally {
+    setAuthLoading(false);
+  }
+};
 
   // Logout function
   const logout = () => {

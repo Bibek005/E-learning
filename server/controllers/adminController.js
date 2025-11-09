@@ -20,3 +20,35 @@ exports.getDashboardStats = async (req, res) => {
   }
 };
 
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, name, email, role FROM users');
+    res.json({ users: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+exports.getAllCourses = async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, title, description FROM courses');
+    res.json({ courses: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getUserProfileById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query('SELECT id, name, email, role, profile_pic FROM users WHERE id=?', [id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+    res.json({ user: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
