@@ -1,6 +1,7 @@
 // src/pages/teacher/Dashboard.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getTeacherDashboardStats } from '../../services/api';
 
 const TeacherDashboard = () => {
   const [stats, setStats] = useState({
@@ -12,13 +13,16 @@ const TeacherDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch teacher stats from backend
-    fetch('/api/teacher/dashboard', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    })
-      .then((res) => res.json())
-      .then((data) => setStats(data))
-      .catch(console.error);
+    const fetchStats = async () => {
+      try {
+        const data = await getTeacherDashboardStats();
+        setStats(data);
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load dashboard. Please login again.');
+      }
+    };
+    fetchStats();
   }, []);
 
   return (
@@ -72,14 +76,6 @@ const TeacherDashboard = () => {
               Evaluate Submissions
             </button>
           </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="font-semibold mb-4">Recent Activity</h2>
-          <ul className="space-y-2">
-            <li className="text-sm">Posted "Midterm Assignment" - 2 days ago</li>
-            <li className="text-sm">Graded 5 submissions for "Course Intro"</li>
-            <li className="text-sm">Uploaded new lecture notes for "Week 3"</li>
-          </ul>
         </div>
       </div>
     </div>

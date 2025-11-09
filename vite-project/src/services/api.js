@@ -1,11 +1,9 @@
 
-
-
-
 // src/services/api.js
 import axios from 'axios';
 
 const API_BASE = 'http://localhost:5000/api';
+const getToken = () => localStorage.getItem('token');
 
 // Create axios instance with default config
 const api = axios.create({
@@ -109,89 +107,164 @@ export const updateAdminProfile = async (userId, userData) => {
 // ======================
 // TEACHER APIs
 // ======================
-export const getTeacherDashboard = async () => {
-  const response = await api.get('/teacher/dashboard');
-  return response.data;
+
+const handleResponse = async (res) => {
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text);
+    if (!res.ok) throw new Error(data.message || res.statusText);
+    return data;
+  } catch {
+    if (!res.ok) throw new Error(text || res.statusText);
+    return text;
+  }
 };
 
-
-// export const getTeacherProfile = async (teacherId) => {
-//   const response = await api.get(`/teacher/profile/${teacherId}`);
-//   return response.data;
-// };
-
-// export const updateTeacherProfile = async (userId, userData) => {
-//   const response = await api.put(`/teacher/profile/${teacherId}`, userdata);
-//   return response.data;
-// };
-
-
-
-// ✅ Correct
-export const getTeacherProfile = async () => {
-  const response = await api.get('/teacher/profile');
-  return response.data;
-};
-
-export const updateTeacherProfile = async (userData) => {
-  const response = await api.put('/teacher/profile', userData);
-  return response.data;
-};
-
-
-export const deleteTeacherCourse = async (courseId) => {
-  const response = await api.delete(`/teacher/courses/${courseId}`);
-  return response.data;
-}; 
-
+// Courses
 export const getTeacherCourses = async () => {
-  const response = await api.get('/teacher/courses');
-  return response.data;
+  const res = await fetch(`${API_BASE}/teacher/courses`, { 
+    headers: { Authorization: `Bearer ${getToken()}` } 
+  });
+  const data = await handleResponse(res);
+
+  // Ensure each course has a unique id
+  if (Array.isArray(data)) {
+    return data.map((course, index) => ({
+      id: course.id ?? index,  // fallback to index if id is missing
+      title: course.title,
+      description: course.description,
+      ...course, // keep other fields
+    }));
+  }
+
+  return Array.isArray(data.courses) ? data.courses.map((course, index) => ({
+    id: course.id ?? index,
+    title: course.title,
+    description: course.description,
+    ...course,
+  })) : [];
 };
 
-export const createTeacherCourse = async (courseData) => {
-  const response = await api.post('/teacher/courses', courseData);
-  return response.data;
+export const updateTeacherCourse = async (id, courseData) => {
+  const res = await fetch(`${API_BASE}/teacher/courses/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(courseData),
+  });
+  return handleResponse(res);
 };
 
-export const getCourseEnrollments = async (courseId) => {
-  const response = await api.get(`/teacher/courses/${courseId}/enrollments`);
-  return response.data;
+
+
+export const createTeacherCourse = async (course) => {
+  const res = await fetch(`${API_BASE}/teacher/courses`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(course),
+  });
+  return handleResponse(res);
 };
 
+export const deleteTeacherCourse = async (id) => {
+  const res = await fetch(`${API_BASE}/teacher/courses/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
+};
+
+// Assignments
 export const getTeacherAssignments = async () => {
-  const response = await api.get('/teacher/assignments');
-  return response.data;
+  const res = await fetch(`${API_BASE}/teacher/assignments`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const data = await handleResponse(res);
+  return Array.isArray(data) ? data : data.assignments || [];
 };
 
-export const createTeacherAssignment = async (assignmentData) => {
-  const response = await api.post('/teacher/assignments', assignmentData);
-  return response.data;
+export const createTeacherAssignment = async (assignment) => {
+  const res = await fetch(`${API_BASE}/teacher/assignments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(assignment),
+  });
+  return handleResponse(res);
 };
 
-export const getAssignmentSubmissions = async (assignmentId) => {
-  const response = await api.get(`/teacher/assignments/${assignmentId}/submissions`);
-  return response.data;
+export const deleteTeacherAssignment = async (id) => {
+  const res = await fetch(`${API_BASE}/teacher/assignments/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
 };
 
+export const updateTeacherAssignment = async (id, assignment) => {
+  const res = await fetch(`${API_BASE}/teacher/assignments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(assignment),
+  });
+  return handleResponse(res);
+};
+
+
+
+// Quizzes
 export const getTeacherQuizzes = async () => {
-  const response = await api.get('/teacher/quizzes');
-  return response.data;
+  const res = await fetch(`${API_BASE}/teacher/quizzes`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const data = await handleResponse(res);
+  return Array.isArray(data) ? data : data.quizzes || [];
 };
 
-export const createTeacherQuiz = async (quizData) => {
-  const response = await api.post('/teacher/quizzes', quizData);
-  return response.data;
+export const createTeacherQuiz = async (quiz) => {
+  const res = await fetch(`${API_BASE}/teacher/quizzes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(quiz),
+  });
+  return handleResponse(res);
 };
 
-export const getQuizAttempts = async (quizId) => {
-  const response = await api.get(`/teacher/quizzes/${quizId}/attempts`);
-  return response.data;
+export const deleteTeacherQuiz = async (id) => {
+  const res = await fetch(`${API_BASE}/teacher/quizzes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
 };
 
-export const getTeacherActivity = async () => {
-  const response = await api.get('/teacher/activity');
-  return response.data;
+// Submissions
+export const getTeacherSubmissions = async () => {
+  const res = await fetch(`${API_BASE}/teacher/submissions`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const data = await handleResponse(res);
+  return Array.isArray(data) ? data : data.submissions || [];
+};
+
+export const evaluateSubmission = async (id, payload) => {
+  const res = await fetch(`${API_BASE}/teacher/submissions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+};
+
+
+export const gradeTeacherSubmission = async (id, data) => {
+  const res = await api.put(`/teacher/submissions/${id}/grade`, data);
+  return res.data;
+};
+
+
+// Profile
+export const getTeacherProfile = async () => {
+  const res = await fetch(`${API_BASE}/teacher/profile`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
+};
+
+export const updateTeacherProfile = async (profile) => {
+  const res = await fetch(`${API_BASE}/teacher/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(profile),
+  });
+  return handleResponse(res);
+};
+
+// Dashboard
+export const getTeacherDashboardStats = async () => {
+  const res = await fetch(`${API_BASE}/teacher/dashboard`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
 };
 
 

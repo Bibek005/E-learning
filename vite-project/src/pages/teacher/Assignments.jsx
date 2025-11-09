@@ -1,135 +1,177 @@
 // src/pages/teacher/Assignments.jsx
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { getTeacherCourses, getTeacherAssignments, createTeacherAssignment, deleteTeacherAssignment } from '../../services/api';
+
+import { FaTrash, FaEdit } from 'react-icons/fa'; // import icons
+
+// Add state to track editing
+const [editingId, setEditingId] = useState(null);
+const [editData, setEditData] = useState({ title: '', description: '', due_date: '', course_id: '' });
+
+// Handle start editing
+const handleEditStart = (assignment) => {
+  setEditingId(assignment.id);
+  setEditData({
+    title: assignment.title,
+    description: assignment.description,
+    due_date: assignment.due_date.split('T')[0], // format yyyy-mm-dd
+    course_id: assignment.course_id,
+  });
+};
+
+// Handle save edit
+const handleEditSave = async (id) => {
+  try {
+    const updated = await updateTeacherAssignment(id, editData); // add this in api.js
+    setAssignments(assignments.map(a => (a.id === id ? updated : a)));
+    setEditingId(null);
+  } catch (err) {
+    console.error(err);
+    alert('Failed to update assignment.');
+  }
+};
+
 
 const TeacherAssignments = () => {
+  const [courses, setCourses] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [newAssignment, setNewAssignment] = useState({
     course_id: '',
     title: '',
     description: '',
-    due_date: '',
+    due_date: ''
   });
-  const [courses, setCourses] = useState([]);
 
   useEffect(() => {
-    fetch('/api/teacher/courses', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    })
-      .then((res) => res.json())
-      .then(setCourses)
-      .catch(console.error);
+    const fetchData = async () => {
+      try {
+        const courseData = await getTeacherCourses();
+        setCourses(courseData);
 
-    fetch('/api/teacher/assignments', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    })
-      .then((res) => res.json())
-      .then(setAssignments)
-      .catch(console.error);
+        const assignmentData = await getTeacherAssignments();
+        setAssignments(assignmentData);
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load assignments or courses.');
+      }
+    };
+    fetchData();
   }, []);
 
-  const handleCreateAssignment = async (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
-    const res = await fetch('/api/teacher/assignments', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify(newAssignment),
-    });
-    if (res.ok) {
-      const assignment = await res.json();
+    try {
+      const assignment = await createTeacherAssignment(newAssignment);
       setAssignments([...assignments, assignment]);
       setNewAssignment({ course_id: '', title: '', description: '', due_date: '' });
+    } catch (err) {
+      console.error(err);
+      alert('Failed to create assignment.');
     }
   };
 
-  const handleDeleteAssignment = async (id) => {
-    if (!confirm('Are you sure you want to delete this assignment?')) return;
-    const res = await fetch(`/api/teacher/assignments/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-    });
-    if (res.ok) {
-      setAssignments(assignments.filter((a) => a.id !== id));
+  const handleDelete = async (id) => {
+    if (!confirm('Delete this assignment?')) return;
+    try {
+      await deleteTeacherAssignment(id);
+      setAssignments(assignments.filter(a => a.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete assignment.');
     }
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Post Assignments</h1>
+      <h1 className="text-2xl font-bold mb-6">Assignments</h1>
 
-      {/* Create Assignment Form */}
-      <form onSubmit={handleCreateAssignment} className="mb-8 p-4 bg-white rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Create New Assignment</h2>
+      <form onSubmit={handleCreate} className="mb-6 bg-white p-4 rounded shadow">
+        <h2 className="font-semibold mb-2">Create New Assignment</h2>
         <select
           value={newAssignment.course_id}
-          onChange={(e) => setNewAssignment({ ...newAssignment, course_id: e.target.value })}
+          onChange={e => setNewAssignment({...newAssignment, course_id: e.target.value})}
           className="w-full p-2 border rounded mb-2"
           required
         >
           <option value="">Select Course</option>
-          {courses.map((course) => (
-            <option key={course.id} value={course.id}>
-              {course.title}
-            </option>
+          {courses.map(c => (
+            <option key={c.id} value={c.id}>{c.title}</option>
           ))}
         </select>
         <input
           type="text"
-          placeholder="Assignment Title"
+          placeholder="Title"
           value={newAssignment.title}
-          onChange={(e) => setNewAssignment({ ...newAssignment, title: e.target.value })}
+          onChange={e => setNewAssignment({...newAssignment, title: e.target.value})}
           className="w-full p-2 border rounded mb-2"
           required
         />
         <textarea
-          placeholder="Assignment Description"
+          placeholder="Description"
           value={newAssignment.description}
-          onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
+          onChange={e => setNewAssignment({...newAssignment, description: e.target.value})}
           className="w-full p-2 border rounded mb-2"
-          rows="3"
+          rows={3}
         />
         <input
           type="date"
           value={newAssignment.due_date}
-          onChange={(e) => setNewAssignment({ ...newAssignment, due_date: e.target.value })}
-          className="w-full p-2 border rounded mb-4"
+          onChange={e => setNewAssignment({...newAssignment, due_date: e.target.value})}
+          className="w-full p-2 border rounded mb-2"
           required
         />
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
           Post Assignment
         </button>
       </form>
 
-      {/* Assignment List */}
       <div className="space-y-4">
-        {assignments.map((assignment) => (
-          <div key={assignment.id} className="bg-white p-4 rounded-lg shadow">
-            <h3 className="font-bold">{assignment.title}</h3>
-            <p className="text-sm text-gray-600">{assignment.description}</p>
-            <p className="text-xs text-gray-500">
-              Due: {new Date(assignment.due_date).toLocaleDateString()}
-            </p>
-            <div className="mt-2 flex space-x-2">
-              <button
-                onClick={() => window.location.href = `/teacher/assignments/${assignment.id}/submissions`}
-                className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm"
-              >
-                View Submissions
-              </button>
-              <button
-                onClick={() => handleDeleteAssignment(assignment.id)}
-                className="px-3 py-1 bg-red-100 text-red-800 rounded text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+       {assignments.map(a => (
+  <div key={a.id} className="bg-white p-4 rounded shadow">
+    {editingId === a.id ? (
+      <>
+        <input
+          className="w-full p-2 border rounded mb-2"
+          value={editData.title}
+          onChange={e => setEditData({ ...editData, title: e.target.value })}
+        />
+        <textarea
+          className="w-full p-2 border rounded mb-2"
+          value={editData.description}
+          onChange={e => setEditData({ ...editData, description: e.target.value })}
+          rows={3}
+        />
+        <input
+          type="date"
+          className="w-full p-2 border rounded mb-2"
+          value={editData.due_date}
+          onChange={e => setEditData({ ...editData, due_date: e.target.value })}
+        />
+        <button onClick={() => handleEditSave(a.id)} className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm mr-2">
+          Save
+        </button>
+        <button onClick={() => setEditingId(null)} className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-sm">
+          Cancel
+        </button>
+      </>
+    ) : (
+      <>
+        <h3 className="font-bold">{a.title}</h3>
+        <p className="text-gray-600">{a.description}</p>
+        <p className="text-xs text-gray-500">Due: {new Date(a.due_date).toLocaleDateString()}</p>
+        <div className="mt-2 flex gap-2">
+          <button onClick={() => handleEditStart(a)} className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">
+            <FaEdit />
+          </button>
+          <button onClick={() => handleDelete(a.id)} className="px-2 py-1 bg-red-100 text-red-800 rounded text-sm">
+            <FaTrash />
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+))}
+
       </div>
     </div>
   );
