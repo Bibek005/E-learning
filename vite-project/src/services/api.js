@@ -201,6 +201,7 @@ export const updateTeacherAssignment = async (id, assignment) => {
 };
 
 
+
 // Quizzes
 export const getTeacherQuizzes = async () => {
   const res = await fetch(`${API_BASE}/teacher/quizzes`, { headers: { Authorization: `Bearer ${getToken()}` } });
