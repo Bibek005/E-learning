@@ -30,6 +30,10 @@ const teacherRoutes = require('./routes/teacher/index');
 const assignmentRoutes = require('./routes/teacher/assignmentRoutes');
 app.use('/api/teacher/assignments', assignmentRoutes);
 
+// const teacherRoutes = require('./routes/teacher');
+// app.use('/api/teacher', teacherRoutes);
+
+
 
 
 // // ✅ Use routes
