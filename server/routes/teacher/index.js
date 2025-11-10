@@ -17,6 +17,9 @@ router.use('/students', require('./studentRoutes'));
 router.use('/submissions', require('./submissionRoutes'));
 router.use('/profile', require('./profileRoutes'));
 
+// router.use('/quizzes', require('./quizRoutes')); // ✅ this must exist!
+
+
 // Teacher dashboard route
 router.get(
   '/dashboard',

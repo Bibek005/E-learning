@@ -191,15 +191,19 @@ export const deleteTeacherAssignment = async (id) => {
   return handleResponse(res);
 };
 
+
+
 export const updateTeacherAssignment = async (id, assignment) => {
   const res = await fetch(`${API_BASE}/teacher/assignments/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken()}`,
+    },
     body: JSON.stringify(assignment),
   });
   return handleResponse(res);
 };
-
 
 
 // Quizzes

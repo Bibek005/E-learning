@@ -10,8 +10,8 @@ const {
 
 router.use(authenticateToken, verifyRole('teacher'));
 
-router.get('/quizzes', getTeacherQuizzes);
-router.post('/quizzes', createTeacherQuiz);
-router.delete('/quizzes/:id', deleteTeacherQuiz);
+router.get('/', getTeacherQuizzes);
+router.post('/', createTeacherQuiz);
+router.delete('/:id', deleteTeacherQuiz);
 
 module.exports = router;
