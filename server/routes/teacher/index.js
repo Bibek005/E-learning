@@ -8,17 +8,23 @@ const verifyRole = require('../../middleware/roleMiddleware');
 // Controllers
 const dashboardController = require('../../controllers/teacher/dashboardController');
 
-// Routes
-router.use('/courses', require('./courseRoutes'));
-router.use('/assignments', require('./assignmentRoutes'));
-router.use('/quizzes', require('./quizRoutes'));
-router.use('/materials', require('./materialRoutes'));
-router.use('/students', require('./studentRoutes'));
-router.use('/submissions', require('./submissionRoutes'));
-router.use('/profile', require('./profileRoutes'));
+// Teacher-related routes
+const quizRoutes = require('./quizRoutes');
+const assignmentRoutes = require('./assignmentRoutes');
+const submissionRoutes = require('./submissionRoutes');
+const courseRoutes = require('./courseRoutes');
+const materialRoutes = require('./materialRoutes');
+const studentRoutes = require('./studentRoutes');
+const profileRoutes = require('./profileRoutes');
 
-// router.use('/quizzes', require('./quizRoutes')); // ✅ this must exist!
-
+// Register routes
+router.use('/quizzes', quizRoutes);
+router.use('/assignments', assignmentRoutes);
+router.use('/submissions', submissionRoutes);
+router.use('/courses', courseRoutes);
+router.use('/materials', materialRoutes);
+router.use('/students', studentRoutes);
+router.use('/profile', profileRoutes);
 
 // Teacher dashboard route
 router.get(

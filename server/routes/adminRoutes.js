@@ -17,4 +17,9 @@ router.get('/users', authenticateToken, verifyRole('admin'), getAllUsers);
 router.get('/courses', authenticateToken, verifyRole('admin'), getAllCourses);
 router.get('/profile/:id', authenticateToken, verifyRole('admin'), getUserProfileById);
 
+
+// const profileRoutes = require('./admin/profileRoutes');
+// router.use('/profile', authenticateToken, verifyRole('admin'), profileRoutes);
+
+
 module.exports = router;
