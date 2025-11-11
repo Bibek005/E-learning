@@ -41,7 +41,7 @@ router.put('/:id', authenticateToken, verifyRole('teacher'), async (req, res) =>
   }
 });
 
-module.exports = router;
+// module.exports = router;
 
 
 // 🧑‍🏫 Teacher routes

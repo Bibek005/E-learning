@@ -30,18 +30,15 @@ const teacherRoutes = require('./routes/teacher/index');
 const assignmentRoutes = require('./routes/teacher/assignmentRoutes');
 app.use('/api/teacher/assignments', assignmentRoutes);
 
-// const teacherRoutes = require('./routes/teacher');
-// app.use('/api/teacher', teacherRoutes);
 
 
 
-
-// // ✅ Use routes
-// app.use('/api/auth', authRoutes);
-// app.use('/api/courses', courseRoutes);
-// app.use('/api/materials', materialRoutes);
-// app.use('/api/admin', adminRoutes);
-// app.use('/api/teacher', teacherRoutes);
+// ✅ Use routes
+app.use('/api/auth', authRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/materials', materialRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/teacher', teacherRoutes);
 
 
 app.use('/api/auth', require('./routes/authRoutes'));
