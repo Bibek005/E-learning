@@ -30,6 +30,27 @@ const teacherRoutes = require('./routes/teacher/index');
 const assignmentRoutes = require('./routes/teacher/assignmentRoutes');
 app.use('/api/teacher/assignments', assignmentRoutes);
 
+const studentRoutes = require('./routes/studentRoutes');
+app.use('/api/student', studentRoutes);
+
+// const express = require('express');
+// const app = express();
+// app.use(express.json());
+
+const studentDashboardRoutes = require('./routes/student/dashboardRoutes');
+const studentProfileRoutes = require('./routes/student/profileRoutes');
+const studentAssignmentRoutes = require('./routes/student/assignmentRoutes');
+const studentQuizRoutes = require('./routes/student/quizRoutes');
+
+app.use('/api/student/dashboard', studentDashboardRoutes);
+app.use('/api/student/profile', studentProfileRoutes);
+app.use('/api/assignments', studentAssignmentRoutes);
+app.use('/api/quizzes', studentQuizRoutes);
+
+app.listen(5000, () => console.log('Server running on port 5000'));
+
+
+
 
 
 
