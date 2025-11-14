@@ -1,82 +1,65 @@
-// ...existing code...
 # E-LearninGs
 
-Monorepo with a Node/Express backend and a React + Vite frontend (developed inside a dev container).
+Monorepo with a Node/Express backend and a React + Vite frontend.
 
 ## Repository layout
-
-- server/ — backend API
-  - `server.js` — main Express app (server/server.js)
-  - `generate-hash.js` — helper to generate bcrypt password hashes (server/generate-hash.js)
-- vite-project/ — React frontend (Vite)
-  - `src/` — React app
-    - `App.jsx` — app routing and auth (vite-project/src/App.jsx)
-    - `main.jsx` — app entry (vite-project/src/main.jsx)
-    - `components/Navbar.jsx` — top navigation (vite-project/src/components/Navbar.jsx)
-    - `services/api.js` — axios wrapper / API helpers (API base: `http://localhost:5000/api`) (vite-project/src/services/api.js)
-    - admin pages: `Profile.jsx`, `ManageUsers.jsx` (vite-project/src/pages/admin/)
-    - sections: `Features.jsx` (vite-project/src/sections/Features.jsx)
-  - `index.html`, `vite.config.js`, `package.json` (vite-project/)
+- server/ — Express backend
+  - server.js — app entry
+  - config/db.js — DB pool
+  - controllers/, routes/, middleware/
+  - generate-hash.js — helper to create bcrypt hashes
+  - uploads/ — uploaded files
+  - package.json, .env (store DB and PORT)
+- vite-project/ — React (Vite) frontend
+  - src/ — components, pages, services
+  - src/services/api.js — API_BASE and axios helpers
+  - index.html, package.json
+- elearning_db.sql — database schema and sample data
 
 ## Requirements
-
-- Node.js (v18+ recommended)
+- Node.js 18+ (recommended)
 - npm or yarn
-- Dev container: Ubuntu 24.04.2 LTS
+- MySQL (or configured DB matching server/config/db.js)
 
-## Running locally
+## Quick start (local)
+1. Prepare DB
+   - Create DB and run elearning_db.sql.
+   - Put DB credentials in server/.env (or adjust server/config/db.js).
 
-1. Start backend
-   ```sh
+2. Run backend
+   ```powershell
    cd server
    npm install
-
-   # Option A: run directly
-   node server.js
-
-   # Option B: use the npm script (if defined)
-   npm run dev
+   npm run dev    # or: node server.js
    ```
-   The backend default API base is `http://localhost:5000/api` (see vite-project/src/services/api.js).
+   Default API base: http://localhost:5000/api (check server/.env)
 
-2. Start frontend
-   ```sh
+3. Run frontend
+   ```powershell
    cd vite-project
    npm install
    npm run dev
    ```
-   Vite will print the dev server URL (typically http://localhost:5173). From the dev container open it on the host with:
-   ```sh
-   $BROWSER http://localhost:5173
-   ```
+   Open URL printed by Vite (usually http://localhost:5173).
 
-3. Create example password hashes (optional)
-   ```sh
-   cd server
-   node generate-hash.js
-   ```
+## Important files & notes
+- API base used by frontend: vite-project/src/services/api.js — update when backend port changes.
+- Uploads handled by server/middleware/uploadMiddleware.js; static files served from server (see server.js).
+- Protect routes with server/middleware/authMiddleware.js and role checks in server/middleware/roleMiddleware.js.
 
-## Useful notes
-
-- Auth & routing:
-  - App and routes: vite-project/src/App.jsx
-  - Navbar / search UI: vite-project/src/components/Navbar.jsx
-- Admin pages:
-  - Profile: vite-project/src/pages/admin/Profile.jsx
-  - Manage users: vite-project/src/pages/admin/ManageUsers.jsx
-- Frontend API helpers: vite-project/src/services/api.js — update API_BASE there if backend port changes.
+## Common commands
+- Backend dev: cd server && npm run dev
+- Frontend dev: cd vite-project && npm run dev
+- Generate password hash (example): node server/generate-hash.js
 
 ## Development tips
-
-- Run backend and frontend in separate terminals inside the dev container.
-- If backend port changes, update API_BASE in vite-project/src/services/api.js.
-- Use the dev container terminal to run both servers concurrently.
+- Run frontend and backend in separate terminals.
+- Keep controllers in server/controllers/ and frontend pages in vite-project/src/pages/.
+- If adding environment variables, document them in server/.env.example.
 
 ## Contributing
-
-- Follow existing code structure and linting config (vite-project/eslint.config.js).
-- Frontend styles use local CSS + Tailwind via CDN in vite-project/index.html.
+- Follow existing code structure and conventions.
+- Add tests when modifying core logic.
 
 ## License
-
-Add project license info here.
+Add license information here.
