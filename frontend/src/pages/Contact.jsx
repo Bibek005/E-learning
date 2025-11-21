@@ -1,154 +1,82 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import '../App.css';
 
-const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-
-  const [errors, setErrors] = useState({
-    email: "",
-  });
+export default function Contact() {
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [status, setStatus] = useState({ sending: false, success: null, message: '' });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    // Real-time email validation
-    if (name === "email") {
-      if (!/\S+@\S+\.\S+/.test(value)) {
-        setErrors({ ...errors, email: "Enter a valid email" });
-      } else {
-        setErrors({ ...errors, email: "" });
-      }
-    }
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const validate = () => {
+    if (!form.name.trim()) return 'Name is required.';
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return 'A valid email is required.';
+    if (!form.message.trim()) return 'Message cannot be empty.';
+    return '';
+  };
 
-    // Validate email before submission
-    if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      setErrors({ ...errors, email: "Enter a valid email" });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationError = validate();
+    if (validationError) {
+      setStatus({ sending: false, success: false, message: validationError });
       return;
     }
 
-    console.log("Form Data:", formData);
-    alert("Thank you for contacting us! We'll get back to you soon.");
-    setFormData({ name: "", email: "", message: "" });
-    setErrors({ email: "" });
+    setStatus({ sending: true, success: null, message: '' });
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('Network error');
+      const data = await res.json();
+      setStatus({ sending: false, success: true, message: data.message || 'Message sent successfully.' });
+      setForm({ name: '', email: '', message: '' });
+    } catch (err) {
+      setStatus({ sending: false, success: false, message: 'Failed to send message. Please try again later.' });
+    }
   };
 
   return (
-    <section id="contact" className="bg-gray-50 py-16 px-6 md:px-16 mt-20">
-      <div className="max-w-6xl mx-auto text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-          Contact Us
-        </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Have questions about our e-learning courses? Fill out the form below
-          and we’ll get back to you as soon as possible.
-        </p>
-      </div>
+    <main className="page-container">
+      <h1>Contact Us</h1>
+      <p>If you have questions or feedback, please send us a message and we’ll get back to you.</p>
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Contact Form */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white shadow-lg rounded-lg p-8 flex flex-col space-y-4"
-        >
-          <input
-            type="text"
-            name="name"
-            placeholder="Your Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+      <form className="contact-form" onSubmit={handleSubmit} noValidate>
+        <label>
+          Name
+          <input name="name" value={form.name} onChange={handleChange} type="text" required />
+        </label>
 
-          <div>
-            <input
-              type="email"
-              name="email"
-              placeholder="Your Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className={`border ${
-                errors.email ? "border-red-500" : "border-gray-300"
-              } rounded-lg p-3 focus:outline-none focus:ring-2 ${
-                errors.email
-                  ? "focus:ring-red-500"
-                  : "focus:ring-blue-500"
-              }`}
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-            )}
-          </div>
+        <label>
+          Email
+          <input name="email" value={form.email} onChange={handleChange} type="email" required />
+        </label>
 
-          <textarea
-            name="message"
-            placeholder="Your Message"
-            value={formData.message}
-            onChange={handleChange}
-            rows="5"
-            required
-            className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
+        <label>
+          Message
+          <textarea name="message" value={form.message} onChange={handleChange} rows="6" required />
+        </label>
 
-          <button
-            type="submit"
-            className="bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition"
-          >
-            Send Message
-          </button>
-        </form>
+        <button type="submit" disabled={status.sending}>
+          {status.sending ? 'Sending…' : 'Send Message'}
+        </button>
 
-        {/* Contact Info */}
-        <div className="flex flex-col justify-center bg-white shadow-lg rounded-lg p-8 space-y-6">
-          <h3 className="text-2xl font-semibold text-gray-800">Get in Touch</h3>
+        {status.message && (
+          <p className={status.success ? 'success' : 'error'}>{status.message}</p>
+        )}
+      </form>
 
-          <div className="space-y-4 text-gray-600">
-            <p>
-              <strong className="text-gray-800">Email:</strong>{" "}
-              support-elearning@gmail.com
-            </p>
-            <p>
-              <strong className="text-gray-800">Phone:</strong> 9812345678
-            </p>
-            <p>
-              <strong className="text-gray-800">Address:</strong> 
-              Somewhere
-            </p>
-          </div>
-
-          <div className="flex space-x-4 mt-4">
-            <a
-              href="#"
-              className="text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              🌐
-            </a>
-            <a
-              href="#"
-              className="text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              💼
-            </a>
-            <a
-              href="#"
-              className="text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              📘
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
+      <section className="contact-info">
+        <h2>Other ways to reach us</h2>
+        <ul>
+          <li>Email: <a href="mailto:support@example.com">support@example.com</a></li>
+          <li>Phone: <a href="tel:+10000000000">+1 (000) 000-0000</a></li>
+        </ul>
+      </section>
+    </main>
   );
-};
-
-export default Contact;
+}
