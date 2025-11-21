@@ -5,6 +5,11 @@ import axios from 'axios';
 const API_BASE = 'http://localhost:5000/api';
 const getToken = () => localStorage.getItem('token');
 
+
+// // set default base if backend on different port
+// axios.defaults.baseURL = 'http://localhost:5000';
+axios.defaults.withCredentials = true; // if you use cookies for auth
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE,
@@ -333,6 +338,48 @@ export const submitAssignment = async (assignmentId, file) => {
   return res.data;
 };
 
+async function loadAssignments() {
+  return axios.get('/api/student/assignments').then(r => r.data);
+}
+
+async function loadQuizzes() {
+  return axios.get('/api/student/quiz').then(r => r.data);
+}
+
+
+
+export async function apiFetch(url, { method = 'GET', body, headers = {}, ...rest } = {}) {
+  const token = localStorage.getItem('token');
+  const init = {
+    method,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
+    },
+    ...rest,
+  };
+  if (body && typeof body !== 'string') init.body = JSON.stringify(body);
+  else if (body) init.body = body;
+
+  const res = await fetch(url, init);
+  if (res.status === 401) {
+    // Auth failed - do not silently navigate to home; allow app to handle it (logout + redirect to login)
+    // Optionally: call logout() here if you import it from AuthContext, or let caller handle
+    throw new Error('Unauthorized');
+  }
+  if (!res.ok) {
+    let data = null;
+    try { data = await res.json(); } catch {}
+    const msg = data?.message || res.statusText || 'Request failed';
+    const err = new Error(msg);
+    err.status = res.status;
+    err.body = data;
+    throw err;
+  }
+  try { return await res.json(); } catch { return null; }
+}
 
 
 // Export axios instance for direct use if needed

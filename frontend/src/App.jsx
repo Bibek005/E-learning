@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Components
@@ -53,6 +53,40 @@ const AuthenticatedLayout = ({ children, user }) => (
   </div>
 );
 
+function StudentRoutesWrapper({ user, isLoggedIn }) {
+  // Parent wrapper for all /student/* routes so we don't repeat the layout and auth check.
+  if (!isLoggedIn || user?.role !== 'student') {
+    return <Navigate to="/login" replace />;
+  }
+  return (
+    <AuthenticatedLayout user={user}>
+      <Outlet />
+    </AuthenticatedLayout>
+  );
+}
+
+function TeacherRoutesWrapper({ user, isLoggedIn }) {
+  if (!isLoggedIn || user?.role !== 'teacher') {
+    return <Navigate to="/login" replace />;
+  }
+  return (
+    <AuthenticatedLayout user={user}>
+      <Outlet />
+    </AuthenticatedLayout>
+  );
+}
+
+function AdminRoutesWrapper({ user, isLoggedIn }) {
+  if (!isLoggedIn || user?.role !== 'admin') {
+    return <Navigate to="/login" replace />;
+  }
+  return (
+    <AuthenticatedLayout user={user}>
+      <Outlet />
+    </AuthenticatedLayout>
+  );
+}
+
 function AppContent() {
   const { user, isLoggedIn, loading } = useAuth();
 
@@ -84,208 +118,43 @@ function AppContent() {
         }
       />
 
-      {/* Admin Routes */}
-      <Route
-        path="/admin/dashboard"
-        element={
-          isLoggedIn && user?.role === 'admin' ? (
-            <AuthenticatedLayout user={user}>
-              <Dashboard />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/admin/users"
-        element={
-          isLoggedIn && user?.role === 'admin' ? (
-            <AuthenticatedLayout user={user}>
-              <ManageUsers />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/admin/courses"
-        element={
-          isLoggedIn && user?.role === 'admin' ? (
-            <AuthenticatedLayout user={user}>
-              <ManageCourses />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/admin/profile"
-        element={
-          isLoggedIn && user?.role === 'admin' ? (
-            <AuthenticatedLayout user={user}>
-              <Profile />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
+      {/* Admin Routes (grouped) */}
+      <Route path="/admin" element={<AdminRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
+        <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="users" element={<ManageUsers />} />
+        <Route path="courses" element={<ManageCourses />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
 
-      {/* Teacher Routes */}
-      <Route
-        path="/teacher/dashboard"
-        element={
-          isLoggedIn && user?.role === 'teacher' ? (
-            <AuthenticatedLayout user={user}>
-              <TeacherDashboard />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/teacher/courses"
-        element={
-          isLoggedIn && user?.role === 'teacher' ? (
-            <AuthenticatedLayout user={user}>
-              <TeacherCourses />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/teacher/assignments"
-        element={
-          isLoggedIn && user?.role === 'teacher' ? (
-            <AuthenticatedLayout user={user}>
-              <TeacherAssignments />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/teacher/quizzes"
-        element={
-          isLoggedIn && user?.role === 'teacher' ? (
-            <AuthenticatedLayout user={user}>
-              <TeacherQuizzes />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/teacher/submissions"
-        element={
-          isLoggedIn && user?.role === 'teacher' ? (
-            <AuthenticatedLayout user={user}>
-              <TeacherSubmissions />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/teacher/profile"
-        element={
-          isLoggedIn && user?.role === 'teacher' ? (
-            <AuthenticatedLayout user={user}>
-              <TeacherProfile />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
+      {/* Teacher Routes (grouped) */}
+      <Route path="/teacher" element={<TeacherRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
+        <Route index element={<TeacherDashboard />} />
+        <Route path="dashboard" element={<TeacherDashboard />} />
+        <Route path="courses" element={<TeacherCourses />} />
+        <Route path="assignments" element={<TeacherAssignments />} />
+        <Route path="quizzes" element={<TeacherQuizzes />} />
+        <Route path="submissions" element={<TeacherSubmissions />} />
+        <Route path="profile" element={<TeacherProfile />} />
+      </Route>
 
-      {/* Student Routes — using AuthenticatedLayout like others */}
-      <Route
-        path="/student/dashboard"
-        element={
-          isLoggedIn && user?.role === 'student' ? (
-            <AuthenticatedLayout user={user}>
-              <StudentDashboard />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/student/courses"
-        element={
-          isLoggedIn && user?.role === 'student' ? (
-            <AuthenticatedLayout user={user}>
-              <StudentCourses />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/student/course/:courseId"
-        element={
-          isLoggedIn && user?.role === 'student' ? (
-            <AuthenticatedLayout user={user}>
-              <CourseDetail />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/student/quiz/:quizId"
-        element={
-          isLoggedIn && user?.role === 'student' ? (
-            <AuthenticatedLayout user={user}>
-              <QuizPage />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/student/assignment/:assignmentId"
-        element={
-          isLoggedIn && user?.role === 'student' ? (
-            <AuthenticatedLayout user={user}>
-              <AssignmentSubmission />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="/student/profile"
-        element={
-          isLoggedIn && user?.role === 'student' ? (
-            <AuthenticatedLayout user={user}>
-              <StudentProfile />
-            </AuthenticatedLayout>
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
+      {/* Student Routes (grouped) */}
+      <Route path="/student" element={<StudentRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
+        <Route index element={<StudentDashboard />} />
+        <Route path="dashboard" element={<StudentDashboard />} />
+        <Route path="courses" element={<StudentCourses />} />
+        <Route path="course/:courseId" element={<CourseDetail />} />
+        <Route path="assignments" element={<Assignments />} />
+        <Route path="assignment/:assignmentId" element={<AssignmentSubmission />} />
+        <Route path="quiz/:quizId" element={<QuizPage />} />
+        <Route path="profile" element={<StudentProfile />} />
+      </Route>
 
-      {/* Catch-all: Redirect unknown routes */}
-      <Route path="/admin/*" element={<Navigate to="/admin/dashboard" replace />} />
-      <Route path="/teacher/*" element={<Navigate to="/teacher/dashboard" replace />} />
-      <Route path="/student/*" element={<Navigate to="/student/dashboard" replace />} />
+      {/* If you want to handle unknown student/teacher/admin subpaths, add a specific 404 under the respective parent.
+          IMPORTANT: Do NOT add broad catch-all redirects like `path="/student/*" element={<Navigate to="/student/dashboard" />}`.
+          They will override intended child routes in some situations and cause the redirect loop/incorrect redirects. */}
+
+      {/* Global catch-all route */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
