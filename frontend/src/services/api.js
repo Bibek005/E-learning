@@ -1,0 +1,339 @@
+
+// src/services/api.js
+import axios from 'axios';
+
+const API_BASE = 'http://localhost:5000/api';
+const getToken = () => localStorage.getItem('token');
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to attach token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor for global error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Auto logout if 401 (Unauthorized)
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+// ======================
+// AUTH API
+// ======================
+export const loginApi = async (credentials) => {
+  const response = await api.post('/auth/login', credentials);
+  return response.data;
+};
+
+// ======================
+// ADMIN APIs
+// ======================
+export const getAdminDashboard = async () => {
+  const response = await api.get('/admin/dashboard');
+  return response.data;
+};
+
+
+export const getAdminUsers = async () => {
+  const response = await api.get('/admin/users');
+  return response.data;
+};
+
+export const createAdminUser = async (userData) => {
+  const response = await api.post('/admin/users', userData);
+  return response.data;
+};
+
+export const updateAdminUser = async (userId, userData) => {
+  const response = await api.put(`/admin/users/${userId}`, userData);
+  return response.data;
+};
+
+export const deleteAdminUser = async (userId) => {
+  const response = await api.delete(`/admin/users/${userId}`);
+  return response.data;
+};
+
+export const getAdminLogs = async () => {
+  const response = await api.get('/admin/logs');
+  return response.data;
+};
+
+// Get all courses (for admin)
+export const getAdminCourses = async () => {
+  const response = await api.get('/admin/courses');
+  return response.data;
+};
+
+// Delete a course
+export const deleteAdminCourse = async (courseId) => {
+  const response = await api.delete(`/admin/courses/${courseId}`);
+  return response.data;
+};
+
+// Get admin profile
+export const getAdminProfile = async (adminId) => {
+  const response = await api.get(`/admin/profile/${adminId}`);
+  return response.data;
+};
+
+// Update admin profile
+export const updateAdminProfile = async (userId, userData) => {
+  const response = await api.put(`/admin/users/${userId}`, userData);
+  return response.data;
+};
+
+// ======================
+// TEACHER APIs
+// ======================
+
+const handleResponse = async (res) => {
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text);
+    if (!res.ok) throw new Error(data.message || res.statusText);
+    return data;
+  } catch {
+    if (!res.ok) throw new Error(text || res.statusText);
+    return text;
+  }
+};
+
+// Courses
+export const getTeacherCourses = async () => {
+  const res = await fetch(`${API_BASE}/teacher/courses`, { 
+    headers: { Authorization: `Bearer ${getToken()}` } 
+  });
+  const data = await handleResponse(res);
+
+  // Ensure each course has a unique id
+  if (Array.isArray(data)) {
+    return data.map((course, index) => ({
+      id: course.id ?? index,  // fallback to index if id is missing
+      title: course.title,
+      description: course.description,
+      ...course, // keep other fields
+    }));
+  }
+
+  return Array.isArray(data.courses) ? data.courses.map((course, index) => ({
+    id: course.id ?? index,
+    title: course.title,
+    description: course.description,
+    ...course,
+  })) : [];
+};
+
+export const updateTeacherCourse = async (id, courseData) => {
+  const res = await fetch(`${API_BASE}/teacher/courses/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(courseData),
+  });
+  return handleResponse(res);
+};
+
+
+
+export const createTeacherCourse = async (course) => {
+  const res = await fetch(`${API_BASE}/teacher/courses`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(course),
+  });
+  return handleResponse(res);
+};
+
+export const deleteTeacherCourse = async (id) => {
+  const res = await fetch(`${API_BASE}/teacher/courses/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
+};
+
+// Assignments
+export const getTeacherAssignments = async () => {
+  const res = await fetch(`${API_BASE}/teacher/assignments`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const data = await handleResponse(res);
+  return Array.isArray(data) ? data : data.assignments || [];
+};
+
+export const createTeacherAssignment = async (assignment) => {
+  const res = await fetch(`${API_BASE}/teacher/assignments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(assignment),
+  });
+  return handleResponse(res);
+};
+
+export const deleteTeacherAssignment = async (id) => {
+  const res = await fetch(`${API_BASE}/teacher/assignments/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
+};
+
+
+
+export const updateTeacherAssignment = async (id, assignment) => {
+  const res = await fetch(`${API_BASE}/teacher/assignments/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getToken()}`,
+    },
+    body: JSON.stringify(assignment),
+  });
+  return handleResponse(res);
+};
+
+
+// Quizzes
+export const getTeacherQuizzes = async () => {
+  const res = await fetch(`${API_BASE}/teacher/quizzes`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const data = await handleResponse(res);
+  return Array.isArray(data) ? data : data.quizzes || [];
+};
+
+export const createTeacherQuiz = async (quiz) => {
+  const res = await fetch(`${API_BASE}/teacher/quizzes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(quiz),
+  });
+  return handleResponse(res);
+};
+
+export const deleteTeacherQuiz = async (id) => {
+  const res = await fetch(`${API_BASE}/teacher/quizzes/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
+};
+
+// Submissions
+export const getTeacherSubmissions = async () => {
+  const res = await fetch(`${API_BASE}/teacher/submissions`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  const data = await handleResponse(res);
+  return Array.isArray(data) ? data : data.submissions || [];
+};
+
+export const evaluateSubmission = async (id, payload) => {
+  const res = await fetch(`${API_BASE}/teacher/submissions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(res);
+};
+
+
+export const gradeTeacherSubmission = async (id, data) => {
+  const res = await api.put(`/teacher/submissions/${id}/grade`, data);
+  return res.data;
+};
+
+
+// Profile
+export const getTeacherProfile = async () => {
+  const res = await fetch(`${API_BASE}/teacher/profile`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
+};
+
+export const updateTeacherProfile = async (profile) => {
+  const res = await fetch(`${API_BASE}/teacher/profile`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify(profile),
+  });
+  return handleResponse(res);
+};
+
+// Dashboard
+export const getTeacherDashboardStats = async () => {
+  const res = await fetch(`${API_BASE}/teacher/dashboard`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  return handleResponse(res);
+};
+
+
+
+// =================== STUDENT APIs ===================
+
+// --------------------------------------------
+// STUDENT DASHBOARD
+// --------------------------------------------
+export const fetchDashboard = async () => {
+  const res = await api.get("/student/dashboard");
+  return res.data;
+};
+
+// --------------------------------------------
+// STUDENT COURSES
+// --------------------------------------------
+export const fetchMyCourses = async () => {
+  const res = await api.get("/student/courses");
+  return res.data;
+};
+
+// --------------------------------------------
+// COURSE DETAILS (materials, assignments, quizzes)
+// --------------------------------------------
+export const fetchCourseDetail = async (courseId) => {
+  const res = await api.get(`/student/courses/${courseId}`);
+  return res.data;
+};
+
+// --------------------------------------------
+// QUIZ DETAILS
+// --------------------------------------------
+export const fetchQuiz = async (quizId) => {
+  const res = await api.get(`/student/quiz/${quizId}`);
+  return res.data;
+};
+
+// --------------------------------------------
+// SUBMIT QUIZ
+// --------------------------------------------
+export const submitQuiz = async (quizId, answers) => {
+  const res = await api.post(`/student/quiz/${quizId}/submit`, { answers });
+  return res.data;
+};
+
+// --------------------------------------------
+// SUBMIT ASSIGNMENT (FILE UPLOAD)
+// --------------------------------------------
+export const submitAssignment = async (assignmentId, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await api.post(
+    `/student/assignments/${assignmentId}/submit`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    }
+  );
+
+  return res.data;
+};
+
+
+
+// Export axios instance for direct use if needed
+export default api;
