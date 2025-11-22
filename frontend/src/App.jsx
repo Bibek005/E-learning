@@ -9,6 +9,12 @@ import Sidebar from './components/Sidebar';
 // Pages
 import Login from './pages/Login';
 import Landingpage from './pages/Landingpage';
+import NotFound from "./pages/NotFound";
+import Blog from "./pages/Blog";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+
+
 
 // Admin
 import Dashboard from './pages/admin/Dashboard';
@@ -37,7 +43,8 @@ import StudentProfile from './pages/student/StudentProfile';
 const PublicLayout = ({ children }) => (
   <div className="flex flex-col min-h-screen bg-gray-50">
     <Navbar />
-    <main className="flex-1 pt-16">{children}</main>
+    <main className="flex-1 pt-24">{children}</main>
+
   </div>
 );
 
@@ -118,6 +125,33 @@ function AppContent() {
         }
       />
 
+      <Route
+        path="/blogs"
+        element={
+          <PublicLayout>
+            <Blog />
+          </PublicLayout>
+        }
+      />
+
+      <Route
+        path="/about"
+        element={
+          <PublicLayout>
+            <About />
+          </PublicLayout>
+        }
+      />
+
+      <Route
+        path="/contact"
+        element={
+          <PublicLayout>
+            <Contact />
+          </PublicLayout>
+        }
+      />
+
       {/* Admin Routes (grouped) */}
       <Route path="/admin" element={<AdminRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
         <Route index element={<Dashboard />} />
@@ -154,8 +188,18 @@ function AppContent() {
           IMPORTANT: Do NOT add broad catch-all redirects like `path="/student/*" element={<Navigate to="/student/dashboard" />}`.
           They will override intended child routes in some situations and cause the redirect loop/incorrect redirects. */}
 
-      {/* Global catch-all route */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Global 404 */}
+      <Route
+        path="*"
+        element={
+          <PublicLayout>
+            <NotFound />
+          </PublicLayout>
+        }
+      />
+
+
+
     </Routes>
   );
 }
