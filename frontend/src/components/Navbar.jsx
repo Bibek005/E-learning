@@ -9,7 +9,8 @@ import { Search } from "lucide-react";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, user } = useAuth();
+
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -105,34 +106,43 @@ const Navbar = () => {
     { name: "Contact Us", path: "/contact" },
   ];
 
-  const userItems = isLoggedIn
-    ? [
-        // {
-        //   title: "Profile",
-        //   icon: <IoPersonCircleOutline size={20} />,
-        //   path: "/profile",
-        //   className: "navbar-mobile-auth-link-signin",
-        //   linkClass: "flex items-center gap-2",
-        // },
-        {
-          title: "Logout",
-          icon: <AiOutlineClose size={20} />,
-          path: "/login",
-          onClick: () => {
-            logout();
-            navigate("/login");
-          },
-          className: "navbar-mobile-auth-link-logout",
-          linkClass: "flex items-center gap-2",
+  const getProfilePath = () => {
+  if (user?.role === "student") return "/student/profile";
+  if (user?.role === "teacher") return "/teacher/profile";
+  if (user?.role === "admin") return "/admin/profile";
+  return "/profile"; // fallback
+};
+
+
+const userItems = isLoggedIn
+  ? [
+      {
+        title: "Profile",
+        icon: <IoPersonCircleOutline size={20} />,
+        path: getProfilePath(),
+        className: "navbar-mobile-auth-link-signin",
+        linkClass: "flex items-center gap-2",
+      },
+      {
+        title: "Logout",
+        icon: <AiOutlineClose size={20} />,
+        path: "#",
+        onClick: () => {
+          logout();
+          navigate("/login");
         },
-      ]
-    : [
-        {
-          title: "Login",
-          path: "/login",
-          className: "navbar-auth-link-signin",
-        },
-      ];
+        className: "navbar-mobile-auth-link-logout",
+        linkClass: "flex items-center gap-2",
+      },
+    ]
+  : [
+      {
+        title: "Login",
+        path: "/login",
+        className: "navbar-auth-link-signin",
+      },
+    ];
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -222,14 +232,15 @@ const Navbar = () => {
 
         {menuOpen && (
           <div className="navbar-dropdown-menu">
-            <Link
-              to="/profile"
-              className="navbar-dropdown-item"
-              onClick={() => setMenuOpen(false)}
-            >
-              <IoPersonCircleOutline size={18} />
-              <span>Profile</span>
-            </Link>
+<Link
+  to={getProfilePath()}
+  className="navbar-dropdown-item"
+  onClick={() => setMenuOpen(false)}
+>
+  <IoPersonCircleOutline size={18} />
+  <span>Profile</span>
+</Link>
+
             <button
               onClick={() => {
                 logout();
@@ -316,7 +327,7 @@ const Navbar = () => {
                   {menuOpen && (
                     <div className="navbar-dropdown-menu">
                       <Link
-                        to="/profile"
+                        to={getProfilePath()}
                         className="navbar-dropdown-item"
                         onClick={() => setMenuOpen(false)}
                       >

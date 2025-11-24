@@ -1,15 +1,14 @@
 const express = require("express");
-const auth = require("../../middleware/authMiddleware");
-
+const router = express.Router();
+const verifyToken = require("../../middleware/authMiddleware");
 
 const {
   getMyCourses,
-  getCourseDetail
+  getCourseDetail,
 } = require("../../controllers/student/course.controller");
 
-const router = express.Router();
-
-router.get("/", auth, getMyCourses);
-router.get("/:courseId", auth, getCourseDetail);
+// PROTECT ROUTES
+router.get("/", verifyToken, getMyCourses);
+router.get("/:courseId", verifyToken, getCourseDetail);
 
 module.exports = router;

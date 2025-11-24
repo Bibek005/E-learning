@@ -1,30 +1,11 @@
-// const express = require('express');
-// const router = express.Router();
-// const authenticateToken = require('../../middleware/authMiddleware');
-// const verifyRole = require('../../middleware/roleMiddleware');
-// const { 
-//   getTeacherAssignments, 
-//   createTeacherAssignment, 
-//   deleteTeacherAssignment 
-// } = require('../../controllers/teacher/assignmentController');
-
-// router.use(authenticateToken, verifyRole('teacher'));
-
-// router.get('/assignments', getTeacherAssignments);
-// router.post('/assignments', createTeacherAssignment);
-// router.delete('/assignments/:id', deleteTeacherAssignment);
-
-// module.exports = router;
-
-
 // server/routes/teacher/assignmentRoutes.js
 const express = require('express');
 const router = express.Router();
-const pool = require('../../config/db'); // your MySQL pool
+const pool = require('../../config/db');
 const authenticateToken = require('../../middleware/authMiddleware');
 const verifyRole = require('../../middleware/roleMiddleware');
 
-// Get all assignments for the logged-in teacher
+// GET all assignments
 router.get('/', authenticateToken, verifyRole('teacher'), async (req, res) => {
   const teacherId = req.user.id;
   try {
@@ -39,7 +20,7 @@ router.get('/', authenticateToken, verifyRole('teacher'), async (req, res) => {
   }
 });
 
-// Create assignment
+// CREATE assignment
 router.post('/', authenticateToken, verifyRole('teacher'), async (req, res) => {
   const teacherId = req.user.id;
   const { course_id, title, description, due_date } = req.body;
@@ -58,7 +39,7 @@ router.post('/', authenticateToken, verifyRole('teacher'), async (req, res) => {
   }
 });
 
-// Delete assignment
+// DELETE assignment
 router.delete('/:id', authenticateToken, verifyRole('teacher'), async (req, res) => {
   const teacherId = req.user.id;
   const assignmentId = req.params.id;
@@ -69,7 +50,8 @@ router.delete('/:id', authenticateToken, verifyRole('teacher'), async (req, res)
       [assignmentId, teacherId]
     );
 
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Assignment not found or not yours' });
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: 'Assignment not found or not yours' });
 
     res.json({ message: 'Assignment deleted' });
   } catch (err) {
@@ -78,28 +60,27 @@ router.delete('/:id', authenticateToken, verifyRole('teacher'), async (req, res)
   }
 });
 
-// Update assignment
+// UPDATE assignment
 router.put('/:id', authenticateToken, verifyRole('teacher'), async (req, res) => {
   const teacherId = req.user.id;
   const assignmentId = req.params.id;
   const { course_id, title, description, due_date } = req.body;
 
   try {
-    // Only allow updating assignments that belong to this teacher
     const [result] = await pool.query(
-      'UPDATE assignments SET course_id = ?, title = ?, description = ?, due_date = ? WHERE id = ? AND teacher_id = ?',
+      'UPDATE assignments SET course_id=?, title=?, description=?, due_date=? WHERE id=? AND teacher_id=?',
       [course_id, title, description, due_date, assignmentId, teacherId]
     );
 
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Assignment not found or not yours' });
+    if (result.affectedRows === 0)
+      return res.status(404).json({ message: 'Assignment not found or not yours' });
 
-    const [updatedAssignment] = await pool.query('SELECT * FROM assignments WHERE id = ?', [assignmentId]);
-    res.json(updatedAssignment[0]);
+    const [updated] = await pool.query('SELECT * FROM assignments WHERE id = ?', [assignmentId]);
+    res.json(updated[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
   }
 });
-
 
 module.exports = router;
