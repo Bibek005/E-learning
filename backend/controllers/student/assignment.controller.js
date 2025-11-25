@@ -18,6 +18,7 @@ exports.getAssignments = async (req, res) => {
 };
 
 
+
 exports.submitAssignment = async (req, res) => {
   const assignmentId = req.params.assignmentId;
   const studentId = req.user.id;

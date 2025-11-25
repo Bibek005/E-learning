@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
-// import courseFileRoutes from './routes/courseFileRoutes.js';
 const fs = require("fs"); // if needed
 // Load env
 dotenv.config();
@@ -27,6 +26,22 @@ app.use(
 
 app.options("*", cors());
 
+
+const auth = require("./middleware/authMiddleware");
+
+const enrollRoutes =  require("./routes/student/enroll.routes")
+
+app.use("/api/student/enroll", auth, enrollRoutes);
+
+
+const myCoursesRoutes = require("./routes/student/myCourses.routes");
+
+app.use("/api/student/my-courses", auth, myCoursesRoutes);
+
+
+const studentCourseDetail = require("./routes/student/courseDetail.routes");
+
+app.use("/api/student/course", auth, studentCourseDetail);
 
 
 

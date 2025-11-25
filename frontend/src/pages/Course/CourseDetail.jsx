@@ -6,11 +6,21 @@ import api from "../../services/api";
 export default function CourseDetail() {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
+    // Fetch course details
     api.get(`/courses/${id}`).then((res) => {
       setCourse(res.data.course);
     });
+
+    // Check if student is enrolled
+    api
+      .get(`/student/enroll/check/${id}`)
+      .then((res) => {
+        setIsEnrolled(res.data.enrolled); // true or false
+      })
+      .catch(() => setIsEnrolled(false));
   }, [id]);
 
   if (!course) return <p className="p-6">Loading...</p>;
@@ -47,13 +57,27 @@ export default function CourseDetail() {
         ))}
       </div>
 
-      {/* Button to enroll */}
-      <Link
-        to={`/student/course/${id}`}
-        className="mt-6 inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
-      >
-        Enroll / Continue Learning
-      </Link>
+      {/* Enroll or Continue Button */}
+      {!isEnrolled ? (
+        <button
+          onClick={() => {
+            api.post(`/student/enroll/${id}`).then(() => {
+              setIsEnrolled(true);
+            });
+          }}
+          className="mt-6 inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700"
+        >
+          Enroll Now
+        </button>
+      ) : (
+        <Link
+          to={`/student/course/${id}`}
+          className="mt-6 inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Continue Learning
+        </Link>
+      )}
+
     </div>
   );
 }

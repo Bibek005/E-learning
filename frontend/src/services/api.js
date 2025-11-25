@@ -13,22 +13,20 @@ axios.defaults.withCredentials = true; // if you use cookies for auth
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 // Request interceptor to attach token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 // Response interceptor for global error handling
 api.interceptors.response.use(
@@ -307,9 +305,10 @@ export const fetchDashboard = async () => {
 // STUDENT COURSES
 // --------------------------------------------
 export const fetchMyCourses = async () => {
-  const res = await api.get("/student/courses");
+  const res = await api.get("/student/my-courses");
   return res.data;
 };
+
 
 // --------------------------------------------
 // COURSE DETAILS (materials, assignments, quizzes)
