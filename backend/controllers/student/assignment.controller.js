@@ -1,5 +1,24 @@
 const db = require("../../config/db");
 
+exports.getAssignments = async (req, res) => {
+  try {
+    const studentId = req.user.id;
+
+    const [assignments] = await db.query(`
+      SELECT a.id, a.title, a.description, a.deadline
+      FROM assignments a
+      JOIN enrollments e ON e.course_id = a.course_id
+      WHERE e.student_id = ?
+    `, [studentId]);
+
+    res.json(assignments);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load assignments" });
+  }
+};
+
+
+
 exports.submitAssignment = async (req, res) => {
   const assignmentId = req.params.assignmentId;
   const studentId = req.user.id;

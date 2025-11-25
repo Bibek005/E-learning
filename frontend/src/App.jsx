@@ -13,6 +13,9 @@ import NotFound from "./pages/NotFound";
 import Blog from "./pages/Blog";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Courses from "./pages/Course/Courses";
+import PublicCourseDetail from "./pages/Course/CourseDetail";
+
 
 
 
@@ -29,11 +32,12 @@ import TeacherProfile from './pages/teacher/Profile';
 import TeacherAssignments from './pages/teacher/Assignments';
 import TeacherQuizzes from './pages/teacher/Quizzes';
 import TeacherSubmissions from './pages/teacher/Submissions';
+import EditCourse from './pages/teacher/EditCourse';
 
 // Student Pages
 import StudentDashboard from './pages/student/StudentDashboard';
 import StudentCourses from './pages/student/StudentCourses';
-import CourseDetail from './pages/student/CourseDetail';
+import StudentCourseDetail from './pages/student/StudentCourseDetail';
 import QuizPage from './pages/student/QuizPage';
 import AssignmentSubmission from './pages/student/AssignmentSubmission';
 import Assignments from './pages/student/Assignments';
@@ -51,9 +55,18 @@ const PublicLayout = ({ children }) => (
 const AuthenticatedLayout = ({ children, user }) => (
   <div className="flex flex-col min-h-screen bg-gray-50">
     <Navbar />
+
     <div className="flex flex-1 pt-16">
-      <Sidebar userRole={user.role} userName={user.name} />
-      <main className="flex-1 p-4 md:p-6">
+      {/* Sidebar only if logged in */}
+      {user ? (
+        <Sidebar userRole={user.role} userName={user.name} />
+      ) : null}
+
+      <main
+        className={`flex-1 p-4 md:p-6 transition-all duration-300 ${
+          user ? "ml-64" : ""
+        }`}
+      >
         <div className="max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
@@ -152,6 +165,33 @@ function AppContent() {
         }
       />
 
+     <Route
+  path="/course"
+  element={
+    isLoggedIn ? (
+      <AuthenticatedLayout user={user}>
+        <Courses />
+      </AuthenticatedLayout>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+<Route
+  path="/course/:id"
+  element={
+    isLoggedIn ? (
+      <AuthenticatedLayout user={user}>
+        <PublicCourseDetail />
+      </AuthenticatedLayout>
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
+
+
       {/* Admin Routes (grouped) */}
       <Route path="/admin" element={<AdminRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
         <Route index element={<Dashboard />} />
@@ -166,6 +206,8 @@ function AppContent() {
         <Route index element={<TeacherDashboard />} />
         <Route path="dashboard" element={<TeacherDashboard />} />
         <Route path="courses" element={<TeacherCourses />} />
+
+        <Route path="/teacher/courses/:id/edit" element={<EditCourse />} />
         <Route path="assignments" element={<TeacherAssignments />} />
         <Route path="quizzes" element={<TeacherQuizzes />} />
         <Route path="submissions" element={<TeacherSubmissions />} />
@@ -177,7 +219,7 @@ function AppContent() {
         <Route index element={<StudentDashboard />} />
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="courses" element={<StudentCourses />} />
-        <Route path="course/:courseId" element={<CourseDetail />} />
+        <Route path="course/:courseId" element={<StudentCourseDetail />} />
         <Route path="assignments" element={<Assignments />} />
         <Route path="assignment/:assignmentId" element={<AssignmentSubmission />} />
         <Route path="quiz/:quizId" element={<QuizPage />} />

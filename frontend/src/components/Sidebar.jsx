@@ -32,8 +32,7 @@ const Sidebar = ({ userRole, userName }) => {
           { name: 'Dashboard', path: '/admin/dashboard', icon: HomeIcon },
           { name: 'Manage Users', path: '/admin/users', icon: UsersIcon },
           { name: 'Manage Courses', path: '/admin/courses', icon: BookOpenIcon },
-          { name: 'Profile', path: '/admin/profile', icon: UserIcon },
-          { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
+          
         ];
         case 'teacher':
   return [
@@ -42,8 +41,7 @@ const Sidebar = ({ userRole, userName }) => {
     { name: 'Assignments', path: '/teacher/assignments', icon: ClipboardDocumentListIcon },
     { name: 'Quizzes', path: '/teacher/quizzes', icon: QuestionMarkCircleIcon },
     { name: 'Submissions', path: '/teacher/submissions', icon: InboxIcon },
-    { name: 'Profile', path: '/teacher/profile', icon: UserIcon },
-    { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
+    
   ];
       case 'student':
   return [
@@ -51,8 +49,7 @@ const Sidebar = ({ userRole, userName }) => {
     { name: 'My Courses', path: '/student/courses', icon: BookOpenIcon },
     { name: 'Assignments', path: '/student/assignments', icon: ClipboardDocumentListIcon },
     { name: 'Quizzes', path: '/student/quizzes', icon: QuestionMarkCircleIcon },
-    { name: 'Profile', path: '/student/profile', icon: UserIcon },
-    { name: 'Logout', path: '/logout', icon: ArrowLeftOnRectangleIcon },
+    
   ];
       default:
         return [];

@@ -17,18 +17,29 @@ const TeacherCourses = () => {
         setCourses(data);
       } catch (err) {
         console.error(err);
-        alert('Failed to load courses. Please login again.');
+        alert('Failed to load courses');
       }
     };
     fetchCourses();
   }, []);
+
+
+  const formData = new FormData();
+  formData.append('title', newCourse.title);
+  formData.append('description', newCourse.description);
+  if (newCourse.thumbnail) formData.append('thumbnail', newCourse.thumbnail);
+  if (newCourse.courseImage) formData.append('courseImage', newCourse.courseImage);
+
+
+
+
 
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     if (!newCourse.title.trim()) return;
     setLoading(true);
     try {
-      const course = await createTeacherCourse(newCourse);
+      const course = await createTeacherCourse(formData);
       setCourses([...courses, course]);
       setNewCourse({ title: '', description: '' });
     } catch (err) {
@@ -38,6 +49,7 @@ const TeacherCourses = () => {
       setLoading(false);
     }
   };
+
 
   const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this course?')) return;
@@ -71,6 +83,20 @@ const TeacherCourses = () => {
           className="w-full p-2 border rounded mb-2"
           rows={3}
         />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setNewCourse({ ...newCourse, thumbnail: e.target.files[0] })}
+          className="w-full p-2 border rounded mb-2"
+        />
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setNewCourse({ ...newCourse, courseImage: e.target.files[0] })}
+          className="w-full p-2 border rounded mb-2"
+        />
+
         <button
           type="submit"
           disabled={loading}
@@ -92,7 +118,7 @@ const TeacherCourses = () => {
             >
               <FaEdit />
             </button>
-            
+
             {/* Delete icon */}
             <button
               onClick={() => handleDelete(c.id)}
@@ -104,6 +130,23 @@ const TeacherCourses = () => {
 
             <h3 className="font-bold text-lg">{c.title}</h3>
             <p className="text-gray-600 mt-1">{c.description || 'No description'}</p>
+
+            {c.thumbnail && (
+              <img
+                src={`http://localhost:5000/uploads/${c.thumbnail}`}
+                alt="Thumbnail"
+                className="w-full h-32 object-cover rounded mb-2"
+              />
+            )}
+
+            {c.course_image && (
+              <img
+                src={`http://localhost:5000/uploads/${c.course_image}`}
+                alt="Course"
+                className="w-full h-32 object-cover rounded mb-2"
+              />
+            )}
+
             <div className="mt-2 flex gap-2">
               <button
                 onClick={() => navigate(`/teacher/courses/${c.id}/assignments`)}
