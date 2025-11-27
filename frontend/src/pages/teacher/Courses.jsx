@@ -1,12 +1,16 @@
 // src/pages/teacher/Courses.jsx
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaTrash, FaEdit } from 'react-icons/fa'; // icons
-import { getTeacherCourses, createTeacherCourse, deleteTeacherCourse } from '../../services/api';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FaTrash, FaEdit } from "react-icons/fa"; // icons
+import {
+  getTeacherCourses,
+  createTeacherCourse,
+  deleteTeacherCourse,
+} from "../../services/api";
 
 const TeacherCourses = () => {
   const [courses, setCourses] = useState([]);
-  const [newCourse, setNewCourse] = useState({ title: '', description: '' });
+  const [newCourse, setNewCourse] = useState({ title: "", description: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -17,48 +21,62 @@ const TeacherCourses = () => {
         setCourses(data);
       } catch (err) {
         console.error(err);
-        alert('Failed to load courses');
+        alert("Failed to load courses");
       }
     };
     fetchCourses();
   }, []);
 
-
   const formData = new FormData();
-  formData.append('title', newCourse.title);
-  formData.append('description', newCourse.description);
-  if (newCourse.thumbnail) formData.append('thumbnail', newCourse.thumbnail);
-  if (newCourse.courseImage) formData.append('courseImage', newCourse.courseImage);
-
-
-
-
+  formData.append("title", newCourse.title);
+  formData.append("description", newCourse.description);
+  if (newCourse.thumbnail) formData.append("thumbnail", newCourse.thumbnail);
+  if (newCourse.courseImage)
+    formData.append("courseImage", newCourse.courseImage);
 
   const handleCreateCourse = async (e) => {
     e.preventDefault();
     if (!newCourse.title.trim()) return;
     setLoading(true);
     try {
-      const course = await createTeacherCourse(formData);
-      setCourses([...courses, course]);
-      setNewCourse({ title: '', description: '' });
+      const formData = new FormData();
+      formData.append("title", newCourse.title);
+      formData.append("description", newCourse.description);
+      if (newCourse.thumbnail)
+        formData.append("thumbnail", newCourse.thumbnail);
+      if (newCourse.courseImage)
+        formData.append("courseImage", newCourse.courseImage);
+
+      const response = await createTeacherCourse(formData);
+      console.log("Created course:", response);
+
+      // Create complete course object with API response
+      const newCourseData = {
+        id: response.courseId,
+        title: newCourse.title,
+        description: newCourse.description,
+        thumbnail: response.thumbnail,
+        course_image: response.diagram_url,
+      };
+
+      setCourses([...courses, newCourseData]);
+      setNewCourse({ title: "", description: "" });
     } catch (err) {
       console.error(err);
-      alert('Failed to create course.');
+      alert("Failed to create course.");
     } finally {
       setLoading(false);
     }
   };
 
-
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this course?')) return;
+    if (!confirm("Are you sure you want to delete this course?")) return;
     try {
       await deleteTeacherCourse(id);
-      setCourses(courses.filter(c => c.id !== id));
+      setCourses(courses.filter((c) => c.id !== id));
     } catch (err) {
       console.error(err);
-      alert('Failed to delete course.');
+      alert("Failed to delete course.");
     }
   };
 
@@ -66,50 +84,68 @@ const TeacherCourses = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">My Courses</h1>
 
-      <form onSubmit={handleCreateCourse} className="mb-6 bg-white p-4 rounded shadow">
+      <form
+        onSubmit={handleCreateCourse}
+        className="mb-6 bg-white p-4 rounded shadow"
+      >
         <h2 className="font-semibold mb-2">Create New Course</h2>
         <input
           type="text"
           placeholder="Course Title"
           value={newCourse.title}
-          onChange={(e) => setNewCourse({ ...newCourse, title: e.target.value })}
+          onChange={(e) =>
+            setNewCourse({ ...newCourse, title: e.target.value })
+          }
           className="w-full p-2 border rounded mb-2"
           required
         />
         <textarea
           placeholder="Course Description"
           value={newCourse.description}
-          onChange={(e) => setNewCourse({ ...newCourse, description: e.target.value })}
+          onChange={(e) =>
+            setNewCourse({ ...newCourse, description: e.target.value })
+          }
           className="w-full p-2 border rounded mb-2"
           rows={3}
         />
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setNewCourse({ ...newCourse, thumbnail: e.target.files[0] })}
+          onChange={(e) =>
+            setNewCourse({ ...newCourse, thumbnail: e.target.files[0] })
+          }
           className="w-full p-2 border rounded mb-2"
         />
 
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setNewCourse({ ...newCourse, courseImage: e.target.files[0] })}
+          onChange={(e) =>
+            setNewCourse({ ...newCourse, courseImage: e.target.files[0] })
+          }
           className="w-full p-2 border rounded mb-2"
         />
 
         <button
           type="submit"
           disabled={loading}
-          className={`px-4 py-2 rounded text-white ${loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
+          className={`px-4 py-2 rounded text-white ${
+            loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          {loading ? 'Creating...' : 'Create Course'}
+          {loading ? "Creating..." : "Create Course"}
         </button>
       </form>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {courses.length === 0 && <p className="text-gray-500 col-span-full">No courses yet.</p>}
-        {courses.map(c => (
-          <div key={c.id} className="bg-white p-4 rounded shadow relative">
+        {courses.length === 0 && (
+          <p className="text-gray-500 col-span-full">No courses yet.</p>
+        )}
+        {courses.map((c) => (
+          <div
+            key={`${c.id || c.title}-${Date.now()}`}
+            className="bg-white p-4 rounded shadow relative"
+          >
             {/* Edit icon */}
             <button
               onClick={() => navigate(`/teacher/courses/${c.id}/edit`)}
@@ -129,7 +165,9 @@ const TeacherCourses = () => {
             </button>
 
             <h3 className="font-bold text-lg">{c.title}</h3>
-            <p className="text-gray-600 mt-1">{c.description || 'No description'}</p>
+            <p className="text-gray-600 mt-1">
+              {c.description || "No description"}
+            </p>
 
             {c.thumbnail && (
               <img
