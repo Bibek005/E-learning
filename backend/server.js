@@ -3,6 +3,10 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
 const fs = require("fs"); // if needed
+const initDB = require('./config/db');
+
+
+
 // Load env
 dotenv.config();
 
@@ -115,6 +119,15 @@ app.use((req, res) => {
 
 // -----------------------------
 //       START SERVER
-// -----------------------------
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// // -----------------------------
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+(async () => {
+  // const db = await initDB(); // DB ready
+  global.db = db; // optional: make pool global if needed
+
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+})();

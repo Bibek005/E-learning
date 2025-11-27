@@ -5,17 +5,20 @@ exports.getAssignments = async (req, res) => {
     const studentId = req.user.id;
 
     const [assignments] = await db.query(`
-      SELECT a.id, a.title, a.description, a.deadline
+      SELECT a.id, a.title, a.description, a.deadline, c.title AS course_title
       FROM assignments a
-      JOIN enrollments e ON e.course_id = a.course_id
+      INNER JOIN courses c ON c.id = a.course_id
+      INNER JOIN enrollments e ON e.course_id = a.course_id
       WHERE e.student_id = ?
     `, [studentId]);
 
     res.json(assignments);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ message: "Failed to load assignments" });
   }
 };
+
 
 
 
