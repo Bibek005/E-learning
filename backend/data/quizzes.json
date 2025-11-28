@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "title": "Week 1 Quiz: HTML & CSS",
+    "description": "Multiple-choice quiz covering the basics of HTML and CSS.",
+    "courseId": 101,
+    "questionsCount": 10
+  },
+  {
+    "id": 2,
+    "title": "Week 2 Quiz: JavaScript Fundamentals",
+    "description": "Short quiz on variables, functions and control flow.",
+    "courseId": 102,
+    "questionsCount": 12
+  }
+]

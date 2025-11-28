@@ -1,6 +1,9 @@
 const db = require("../../config/db");
 
+<<<<<<< HEAD
+=======
 // Get overall student stats
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 exports.getStudentStats = async (req, res) => {
   const studentId = req.user.id;
 
@@ -13,6 +16,12 @@ exports.getStudentStats = async (req, res) => {
     const [[pendingAssignments]] = await db.query(
       `SELECT COUNT(*) AS total 
        FROM assignments a
+<<<<<<< HEAD
+       LEFT JOIN submissions s 
+       ON a.id = s.assignment_id AND s.student_id = ?
+       WHERE s.id IS NULL`,
+      [studentId]
+=======
        INNER JOIN enrollments e ON e.course_id = a.course_id
        LEFT JOIN submissions s 
          ON s.assignment_id = a.id 
@@ -20,6 +29,7 @@ exports.getStudentStats = async (req, res) => {
        WHERE e.student_id = ?
        AND s.id IS NULL`,
       [studentId, studentId]
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
     );
 
     const [[quizCount]] = await db.query(
@@ -36,6 +46,8 @@ exports.getStudentStats = async (req, res) => {
     res.status(500).json({ error: "Stats fetch failed" });
   }
 };
+<<<<<<< HEAD
+=======
 
 
 // Get progress for a single course
@@ -80,3 +92,4 @@ exports.getCourseProgress = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch course progress" });
   }
 };
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0

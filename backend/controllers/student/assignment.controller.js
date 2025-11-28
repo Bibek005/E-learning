@@ -1,5 +1,19 @@
 const db = require("../../config/db");
 
+<<<<<<< HEAD
+exports.submitAssignment = async (req, res) => {
+  const assignmentId = req.params.assignmentId;
+  const studentId = req.user.id;
+  const fileUrl = req.file.filename;
+
+  await db.query(
+    `INSERT INTO submissions (assignment_id, student_id, file_url, status, submitted_at)
+     VALUES (?,?,?,?,NOW())`,
+    [assignmentId, studentId, fileUrl, "submitted"]
+  );
+
+  res.json({ success: true, file: fileUrl });
+=======
 exports.getAssignments = async (req, res) => {
   try {
     const studentId = req.user.id;
@@ -54,4 +68,5 @@ exports.submitAssignment = async (req, res) => {
       .status(500)
       .json({ message: "Failed to submit assignment", error: err.message });
   }
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 };
