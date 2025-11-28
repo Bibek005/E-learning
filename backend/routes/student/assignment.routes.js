@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // const express = require("express");
 // const auth = require("../../middleware/authMiddleware");
 // const upload = require("../../middleware/upload");
@@ -27,5 +28,28 @@ const { submitAssignment } = require("../../controllers/student/assignment.contr
 
 // POST /api/student/assignments/submit/12
 router.post("/submit/:assignmentId", upload.single("file"), submitAssignment);
+=======
+const express = require("express");
+const router = express.Router();
+const upload = require("../../middleware/upload");
+
+const { submitAssignment, getAssignments } = require("../../controllers/student/assignment.controller");
+const auth = require("../../middleware/authMiddleware");
+
+// ----------------------
+//     STUDENT ROUTES
+// ----------------------
+
+// Get all assignments for logged-in student
+router.get("/", auth, getAssignments);
+
+// Submit assignment with file upload
+router.post(
+  "/submit/:assignmentId",
+  auth,
+  upload.single("file"),
+  submitAssignment
+);
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 
 module.exports = router;

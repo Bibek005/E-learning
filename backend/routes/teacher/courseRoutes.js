@@ -1,10 +1,17 @@
+<<<<<<< HEAD
 
 // server/routes/teacher/courseRoutes.js
+=======
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 const express = require('express');
 const router = express.Router();
 
 const auth = require('../../middleware/authMiddleware');
 const role = require('../../middleware/roleMiddleware');
+<<<<<<< HEAD
+=======
+const upload = require('../../middleware/uploadMiddleware');
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 
 const {
   createCourse,
@@ -14,6 +21,7 @@ const {
   getAllCourses,
 } = require('../../controllers/teacher/courseController');
 
+<<<<<<< HEAD
 const db = require('../../config/db'); // your MySQL db
 const authenticateToken = require('../../middleware/authMiddleware');
 const verifyRole = require('../../middleware/roleMiddleware');
@@ -51,6 +59,39 @@ router.put('/:id', auth, role('teacher'), updateCourse);
 router.delete('/:id', auth, role('teacher'), deleteCourse);
 
 // 🎓 Public route for students
+=======
+// Create Course
+router.post(
+  '/',
+  auth,
+  role('teacher'),
+  upload.fields([
+    { name: 'thumbnail', maxCount: 1 },
+    { name: 'course_image', maxCount: 1 } // rename to match frontend FormData
+  ]),
+  createCourse
+);
+
+// Get all courses of logged-in teacher
+router.get('/teacher', auth, role('teacher'), getTeacherCourses);
+
+// Update a course
+router.put(
+  '/:id',
+  auth,
+  role('teacher'),
+  upload.fields([
+    { name: 'thumbnail', maxCount: 1 },
+    { name: 'course_image', maxCount: 1 }
+  ]),
+  updateCourse
+);
+
+// Delete a course
+router.delete('/:id', auth, role('teacher'), deleteCourse);
+
+// Public route for students
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 router.get('/', getAllCourses);
 
 module.exports = router;

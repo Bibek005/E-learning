@@ -2,16 +2,29 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const path = require("path");
+<<<<<<< HEAD
 
+=======
+const fs = require("fs"); // if needed
+// Load env
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 dotenv.config();
 
 const app = express();
 
 // Middleware
 app.use(express.json());
+<<<<<<< HEAD
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // CORS FIX
+=======
+
+// Static uploads folder
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// CORS
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -23,19 +36,78 @@ app.use(
 
 app.options("*", cors());
 
+<<<<<<< HEAD
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+=======
+
+const auth = require("./middleware/authMiddleware");
+
+const enrollRoutes =  require("./routes/student/enroll.routes")
+
+app.use("/api/student/enroll", auth, enrollRoutes);
+
+
+const myCoursesRoutes = require("./routes/student/myCourses.routes");
+
+app.use("/api/student/my-courses", auth, myCoursesRoutes);
+
+
+const studentCourseDetail = require("./routes/student/courseDetail.routes");
+
+app.use("/api/student/course", auth, studentCourseDetail);
+
+
+
+// course file routes
+const courseFileRoutes = require("./routes/courseFileRoutes"); // use require
+const COURSES_DIR = path.join(process.cwd(), 'courses');
+if (!fs.existsSync(COURSES_DIR)) fs.mkdirSync(COURSES_DIR);
+app.use("/api/courseFile", courseFileRoutes);
+
+// -----------------------------
+//       ROUTE IMPORTS
+// -----------------------------
+
+// Auth
+const authRoutes = require("./routes/authRoutes");
+
+// Admin
+const adminRoutes = require("./routes/adminRoutes");
+
+
+
+// Teacher
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 const teacherRoutes = require("./routes/teacher/index");
 const courseRoutesTeacher = require("./routes/teacher/courseRoutes");
 const materialRoutesTeacher = require("./routes/teacher/materialRoutes");
 
+<<<<<<< HEAD
+=======
+// Student
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 const studentDashboardRoutes = require("./routes/student/dashboard.routes");
 const studentCourseRoutes = require("./routes/student/course.routes");
 const studentQuizRoutes = require("./routes/student/quiz.routes");
 const studentAssignmentRoutes = require("./routes/student/assignment.routes");
 const studentStatsRoutes = require("./routes/student/stats.routes");
 
+<<<<<<< HEAD
+=======
+// Blog / Posts
+const blogRoutes = require("./routes/blogRoutes");
+
+// NEW — Your “get all courses” + “course details” routes
+const courseRoutes = require("./routes/courses"); // <<< COMMON JS VERSION
+// const studentRoutes = require("./routes/student"); // <<< COMMON JS VERSION
+
+// -----------------------------
+//       ROUTES SETUP
+// -----------------------------
+
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 // Student Routes
 app.use("/api/student/dashboard", studentDashboardRoutes);
 app.use("/api/student/courses", studentCourseRoutes);
@@ -47,6 +119,7 @@ app.use("/api/student/stats", studentStatsRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/teacher", teacherRoutes);
+<<<<<<< HEAD
 app.use("/api/courses", courseRoutesTeacher);
 app.use("/api/materials", materialRoutesTeacher);
 
@@ -57,3 +130,26 @@ app.use("/api/posts", blogRoutes);
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+=======
+app.use("/api/teacher/courses", courseRoutesTeacher);
+app.use("/api/teacher/materials", materialRoutesTeacher);
+
+app.use("/api/courses", courseRoutes);
+// app.use("/api/student", studentRoutes);
+
+// Blog
+app.use("/api/posts", blogRoutes);
+
+// -----------------------------
+//       404 HANDLER
+// -----------------------------
+app.use((req, res) => {
+  res.status(404).json({ message: "Page not found" });
+});
+
+// -----------------------------
+//       START SERVER
+// -----------------------------
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0

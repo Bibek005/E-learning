@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const Contact = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center px-4 py-10">
@@ -71,3 +72,17 @@ const Contact = () => {
 };
 
 export default Contact;
+=======
+
+
+
+const Contact = ()=>{
+  return (
+    <>
+     This is the contact page
+    </>
+  )
+}
+
+export default Contact;
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0

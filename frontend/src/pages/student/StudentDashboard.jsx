@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // import { useState, useEffect } from 'react';
 // import axios from 'axios';
 
@@ -121,6 +122,8 @@
 // export default StudentDashboard;
 
 
+=======
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 
 
 

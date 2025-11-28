@@ -13,12 +13,17 @@ axios.defaults.withCredentials = true; // if you use cookies for auth
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE,
+<<<<<<< HEAD
+=======
+  withCredentials: true,
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 // Request interceptor to attach token
+<<<<<<< HEAD
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -29,6 +34,15 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+=======
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 
 // Response interceptor for global error handling
 api.interceptors.response.use(
@@ -113,6 +127,15 @@ export const updateAdminProfile = async (userId, userData) => {
 // TEACHER APIs
 // ======================
 
+<<<<<<< HEAD
+=======
+
+
+// ======================
+// TEACHER APIs
+// ======================
+
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 const handleResponse = async (res) => {
   const text = await res.text();
   try {
@@ -125,13 +148,18 @@ const handleResponse = async (res) => {
   }
 };
 
+<<<<<<< HEAD
 // Courses
+=======
+// Get all teacher courses
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 export const getTeacherCourses = async () => {
   const res = await fetch(`${API_BASE}/teacher/courses`, { 
     headers: { Authorization: `Bearer ${getToken()}` } 
   });
   const data = await handleResponse(res);
 
+<<<<<<< HEAD
   // Ensure each course has a unique id
   if (Array.isArray(data)) {
     return data.map((course, index) => ({
@@ -139,6 +167,14 @@ export const getTeacherCourses = async () => {
       title: course.title,
       description: course.description,
       ...course, // keep other fields
+=======
+  if (Array.isArray(data)) {
+    return data.map((course, index) => ({
+      id: course.id ?? index,
+      title: course.title,
+      description: course.description,
+      ...course,
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
     }));
   }
 
@@ -150,15 +186,28 @@ export const getTeacherCourses = async () => {
   })) : [];
 };
 
+<<<<<<< HEAD
 export const updateTeacherCourse = async (id, courseData) => {
   const res = await fetch(`${API_BASE}/teacher/courses/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
     body: JSON.stringify(courseData),
+=======
+// Update a teacher course (text + optional files)
+export const updateTeacherCourse = async (id, courseData) => {
+  // courseData must be FormData
+  const res = await fetch(`${API_BASE}/teacher/courses/${id}`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${getToken()}`, // DO NOT set Content-Type
+    },
+    body: courseData,
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
   });
   return handleResponse(res);
 };
 
+<<<<<<< HEAD
 
 
 export const createTeacherCourse = async (course) => {
@@ -166,15 +215,36 @@ export const createTeacherCourse = async (course) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
     body: JSON.stringify(course),
+=======
+// Create a new course
+export const createTeacherCourse = async (formData) => {
+  const res = await fetch(`${API_BASE}/teacher/courses`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${getToken()}` },
+    body: formData,
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
   });
   return handleResponse(res);
 };
 
+<<<<<<< HEAD
 export const deleteTeacherCourse = async (id) => {
   const res = await fetch(`${API_BASE}/teacher/courses/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${getToken()}` } });
   return handleResponse(res);
 };
 
+=======
+// Delete a course
+export const deleteTeacherCourse = async (id) => {
+  const res = await fetch(`${API_BASE}/teacher/courses/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${getToken()}` },
+  });
+  return handleResponse(res);
+};
+
+
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 // Assignments
 export const getTeacherAssignments = async () => {
   const res = await fetch(`${API_BASE}/teacher/assignments`, { headers: { Authorization: `Bearer ${getToken()}` } });
@@ -278,6 +348,11 @@ export const getTeacherDashboardStats = async () => {
 
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 // =================== STUDENT APIs ===================
 
 // --------------------------------------------
@@ -292,10 +367,18 @@ export const fetchDashboard = async () => {
 // STUDENT COURSES
 // --------------------------------------------
 export const fetchMyCourses = async () => {
+<<<<<<< HEAD
   const res = await api.get("/student/courses");
   return res.data;
 };
 
+=======
+  const res = await api.get("/student/my-courses");
+  return res.data;
+};
+
+
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 // --------------------------------------------
 // COURSE DETAILS (materials, assignments, quizzes)
 // --------------------------------------------
