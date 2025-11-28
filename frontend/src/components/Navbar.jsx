@@ -9,8 +9,12 @@ import { Search } from "lucide-react";
 import "./Navbar.css";
 
 const Navbar = () => {
+<<<<<<< HEAD
+  const { isLoggedIn, logout } = useAuth();
+=======
   const { isLoggedIn, logout, user } = useAuth();
 
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
   const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
@@ -106,6 +110,36 @@ const Navbar = () => {
     { name: "Contact Us", path: "/contact" },
   ];
 
+<<<<<<< HEAD
+  const userItems = isLoggedIn
+    ? [
+        // {
+        //   title: "Profile",
+        //   icon: <IoPersonCircleOutline size={20} />,
+        //   path: "/profile",
+        //   className: "navbar-mobile-auth-link-signin",
+        //   linkClass: "flex items-center gap-2",
+        // },
+        {
+          title: "Logout",
+          icon: <AiOutlineClose size={20} />,
+          path: "/login",
+          onClick: () => {
+            logout();
+            navigate("/login");
+          },
+          className: "navbar-mobile-auth-link-logout",
+          linkClass: "flex items-center gap-2",
+        },
+      ]
+    : [
+        {
+          title: "Login",
+          path: "/login",
+          className: "navbar-auth-link-signin",
+        },
+      ];
+=======
   const getProfilePath = () => {
   if (user?.role === "student") return "/student/profile";
   if (user?.role === "teacher") return "/teacher/profile";
@@ -143,6 +177,7 @@ const userItems = isLoggedIn
       },
     ];
 
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -232,6 +267,16 @@ const userItems = isLoggedIn
 
         {menuOpen && (
           <div className="navbar-dropdown-menu">
+<<<<<<< HEAD
+            <Link
+              to="/profile"
+              className="navbar-dropdown-item"
+              onClick={() => setMenuOpen(false)}
+            >
+              <IoPersonCircleOutline size={18} />
+              <span>Profile</span>
+            </Link>
+=======
 <Link
   to={getProfilePath()}
   className="navbar-dropdown-item"
@@ -241,6 +286,7 @@ const userItems = isLoggedIn
   <span>Profile</span>
 </Link>
 
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
             <button
               onClick={() => {
                 logout();
@@ -327,7 +373,11 @@ const userItems = isLoggedIn
                   {menuOpen && (
                     <div className="navbar-dropdown-menu">
                       <Link
+<<<<<<< HEAD
+                        to="/profile"
+=======
                         to={getProfilePath()}
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
                         className="navbar-dropdown-item"
                         onClick={() => setMenuOpen(false)}
                       >

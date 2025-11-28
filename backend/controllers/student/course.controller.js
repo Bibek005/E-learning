@@ -96,3 +96,4 @@ exports.getCourseDetail = async (req, res) => {
     res.status(500).json({ error: "Failed to load course detail" });
   }
 };
+

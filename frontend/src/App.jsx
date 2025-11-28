@@ -1,4 +1,16 @@
 // src/App.jsx
+<<<<<<< HEAD
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+// Components
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+
+// Pages
+import Login from './pages/Login';
+import Landingpage from './pages/Landingpage';
+=======
 import {
   BrowserRouter,
   Routes,
@@ -15,10 +27,38 @@ import Sidebar from "./components/Sidebar";
 // Pages
 import Login from "./pages/Login";
 import Landingpage from "./pages/Landingpage";
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 import NotFound from "./pages/NotFound";
 import Blog from "./pages/Blog";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+<<<<<<< HEAD
+
+
+
+// Admin
+import Dashboard from './pages/admin/Dashboard';
+import ManageUsers from './pages/admin/ManageUsers';
+import ManageCourses from './pages/admin/ManageCourses';
+import Profile from './pages/admin/Profile';
+
+// Teacher
+import TeacherDashboard from './pages/teacher/Dashboard';
+import TeacherCourses from './pages/teacher/Courses';
+import TeacherProfile from './pages/teacher/Profile';
+import TeacherAssignments from './pages/teacher/Assignments';
+import TeacherQuizzes from './pages/teacher/Quizzes';
+import TeacherSubmissions from './pages/teacher/Submissions';
+
+// Student Pages
+import StudentDashboard from './pages/student/StudentDashboard';
+import StudentCourses from './pages/student/StudentCourses';
+import CourseDetail from './pages/student/CourseDetail';
+import QuizPage from './pages/student/QuizPage';
+import AssignmentSubmission from './pages/student/AssignmentSubmission';
+import Assignments from './pages/student/Assignments';
+import StudentProfile from './pages/student/StudentProfile';
+=======
 import Courses from "./pages/Course/Courses";
 import PublicCourseDetail from "./pages/Course/CourseDetail";
 
@@ -45,18 +85,28 @@ import QuizPage from "./pages/student/QuizPage";
 import AssignmentSubmission from "./pages/student/AssignmentSubmission";
 import Assignments from "./pages/student/Assignments";
 import StudentProfile from "./pages/student/StudentProfile";
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
 
 // Layout Components
 const PublicLayout = ({ children }) => (
   <div className="flex flex-col min-h-screen bg-gray-50">
     <Navbar />
     <main className="flex-1 pt-24">{children}</main>
+<<<<<<< HEAD
+
+=======
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
   </div>
 );
 
 const AuthenticatedLayout = ({ children, user }) => (
   <div className="flex flex-col min-h-screen bg-gray-50">
     <Navbar />
+<<<<<<< HEAD
+    <div className="flex flex-1 pt-16">
+      <Sidebar userRole={user.role} userName={user.name} />
+      <main className="flex-1 p-4 md:p-6">
+=======
 
     <div className="flex flex-1 pt-16">
       {/* Sidebar only if logged in */}
@@ -67,6 +117,7 @@ const AuthenticatedLayout = ({ children, user }) => (
           user ? "ml-64" : ""
         }`}
       >
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
         <div className="max-w-7xl mx-auto">{children}</div>
       </main>
     </div>
@@ -75,7 +126,11 @@ const AuthenticatedLayout = ({ children, user }) => (
 
 function StudentRoutesWrapper({ user, isLoggedIn }) {
   // Parent wrapper for all /student/* routes so we don't repeat the layout and auth check.
+<<<<<<< HEAD
+  if (!isLoggedIn || user?.role !== 'student') {
+=======
   if (!isLoggedIn || user?.role !== "student") {
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
     return <Navigate to="/login" replace />;
   }
   return (
@@ -86,7 +141,11 @@ function StudentRoutesWrapper({ user, isLoggedIn }) {
 }
 
 function TeacherRoutesWrapper({ user, isLoggedIn }) {
+<<<<<<< HEAD
+  if (!isLoggedIn || user?.role !== 'teacher') {
+=======
   if (!isLoggedIn || user?.role !== "teacher") {
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
     return <Navigate to="/login" replace />;
   }
   return (
@@ -97,7 +156,11 @@ function TeacherRoutesWrapper({ user, isLoggedIn }) {
 }
 
 function AdminRoutesWrapper({ user, isLoggedIn }) {
+<<<<<<< HEAD
+  if (!isLoggedIn || user?.role !== 'admin') {
+=======
   if (!isLoggedIn || user?.role !== "admin") {
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
     return <Navigate to="/login" replace />;
   }
   return (
@@ -165,6 +228,10 @@ function AppContent() {
         }
       />
 
+<<<<<<< HEAD
+      {/* Admin Routes (grouped) */}
+      <Route path="/admin" element={<AdminRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
+=======
       <Route
         path="/course"
         element={
@@ -196,6 +263,7 @@ function AppContent() {
         path="/admin"
         element={<AdminRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}
       >
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="users" element={<ManageUsers />} />
@@ -204,6 +272,12 @@ function AppContent() {
       </Route>
 
       {/* Teacher Routes (grouped) */}
+<<<<<<< HEAD
+      <Route path="/teacher" element={<TeacherRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
+        <Route index element={<TeacherDashboard />} />
+        <Route path="dashboard" element={<TeacherDashboard />} />
+        <Route path="courses" element={<TeacherCourses />} />
+=======
       <Route
         path="/teacher"
         element={<TeacherRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}
@@ -213,6 +287,7 @@ function AppContent() {
         <Route path="courses" element={<TeacherCourses />} />
 
         <Route path="/teacher/courses/:id/edit" element={<EditCourse />} />
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
         <Route path="assignments" element={<TeacherAssignments />} />
         <Route path="quizzes" element={<TeacherQuizzes />} />
         <Route path="submissions" element={<TeacherSubmissions />} />
@@ -220,6 +295,15 @@ function AppContent() {
       </Route>
 
       {/* Student Routes (grouped) */}
+<<<<<<< HEAD
+      <Route path="/student" element={<StudentRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}>
+        <Route index element={<StudentDashboard />} />
+        <Route path="dashboard" element={<StudentDashboard />} />
+        <Route path="courses" element={<StudentCourses />} />
+        <Route path="course/:courseId" element={<CourseDetail />} />
+        <Route path="assignments" element={<Assignments />} />
+        <Route path="assignment/:assignmentId" element={<AssignmentSubmission />} />
+=======
       <Route
         path="/student"
         element={<StudentRoutesWrapper user={user} isLoggedIn={isLoggedIn} />}
@@ -234,6 +318,7 @@ function AppContent() {
           element={<AssignmentSubmission />}
         />{" "}
         {/* CHANGED: assignment → assignments */}
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
         <Route path="quiz/:quizId" element={<QuizPage />} />
         <Route path="profile" element={<StudentProfile />} />
       </Route>
@@ -251,6 +336,12 @@ function AppContent() {
           </PublicLayout>
         }
       />
+<<<<<<< HEAD
+
+
+
+=======
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
     </Routes>
   );
 }
@@ -265,4 +356,8 @@ function App() {
   );
 }
 
+<<<<<<< HEAD
 export default App;
+=======
+export default App;
+>>>>>>> b1303d1fe1895168c6ba5aeb1db09de4cc8c41d0
