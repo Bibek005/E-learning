@@ -1,15 +1,15 @@
 const db = require('../../config/db');
 
-
+// Get quizzes of logged-in teacher
 exports.getTeacherQuizzes = async (req, res) => {
   try {
     const teacherId = req.user.id;
 
     const [rows] = await db.query(
-      `SELECT q.*, c.title AS course_title
+      `SELECT q.id, q.title, q.time_limit, c.title AS course_title
        FROM quizzes q
        JOIN courses c ON q.course_id = c.id
-       WHERE c.teacher_id = ?`,
+       WHERE q.teacher_id = ?`,
       [teacherId]
     );
 
@@ -20,28 +20,13 @@ exports.getTeacherQuizzes = async (req, res) => {
   }
 };
 
-
-
-// exports.createTeacherQuiz = async (req, res) => {
-//   const { title, description, course_id, due_date } = req.body;
-//   try {
-//     const [result] = await db.query(
-//       'INSERT INTO quizzes (title, description, course_id, teacher_id, due_date) VALUES (?, ?, ?, ?, ?)',
-//       [title, description, course_id, req.user.id, due_date]
-//     );
-//     res.json({ message: 'Quiz created successfully', id: result.insertId });
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
-
-
+// Create a new quiz
 exports.createTeacherQuiz = async (req, res) => {
-  const { course_id, title, time_limit, questions } = req.body;
-  const teacherId = req.user.id;
-
   try {
-    // Verify course belongs to teacher
+    const teacherId = req.user.id;
+    const { course_id, title, time_limit, questions } = req.body;
+
+    // Verify the course belongs to teacher
     const [courseCheck] = await db.query(
       `SELECT * FROM courses WHERE id = ? AND teacher_id = ?`,
       [course_id, teacherId]
@@ -49,11 +34,11 @@ exports.createTeacherQuiz = async (req, res) => {
     if (courseCheck.length === 0)
       return res.status(403).json({ error: 'Unauthorized course access' });
 
-    // Insert quiz (no description field!)
+    // Insert quiz with teacher_id
     const [quizResult] = await db.query(
-      `INSERT INTO quizzes (course_id, title, time_limit, created_at)
-       VALUES (?, ?, ?, NOW())`,
-      [course_id, title, time_limit]
+      `INSERT INTO quizzes (course_id, title, time_limit, created_at, teacher_id)
+       VALUES (?, ?, ?, NOW(), ?)`,
+      [course_id, title, time_limit, teacherId]
     );
 
     const quizId = quizResult.insertId;
@@ -63,7 +48,7 @@ exports.createTeacherQuiz = async (req, res) => {
       await db.query(
         `INSERT INTO quiz_questions (quiz_id, question_text, options, correct_answer)
          VALUES (?, ?, ?, ?)`,
-        [quizId, q.question_text, JSON.stringify(q.options), q.correct_answer]
+        [quizId, q.question_text, JSON.stringify(q.options), parseInt(q.correct_answer)]
       );
     }
 
@@ -74,21 +59,26 @@ exports.createTeacherQuiz = async (req, res) => {
   }
 };
 
-
-
-
-
+// Delete a quiz
 exports.deleteTeacherQuiz = async (req, res) => {
   try {
+    const teacherId = req.user.id;
+    const quizId = req.params.id;
+
     const [result] = await db.query(
-      'DELETE FROM quizzes WHERE id = ? AND teacher_id = ?',
-      [req.params.id, req.user.id]
+      `DELETE q
+       FROM quizzes q
+       JOIN courses c ON q.course_id = c.id
+       WHERE q.id = ? AND c.teacher_id = ?`,
+      [quizId, teacherId]
     );
+
     if (result.affectedRows === 0)
-      return res.status(404).json({ message: 'Quiz not found or not authorized' });
+      return res.status(404).json({ message: 'Quiz not found or unauthorized' });
 
     res.json({ message: 'Quiz deleted successfully' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error deleting quiz:', err);
+    res.status(500).json({ error: 'Failed to delete quiz' });
   }
 };
