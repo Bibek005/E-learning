@@ -9,7 +9,7 @@ const StudentCourses = () => {
     const load = async () => {
       try {
         const data = await fetchMyCourses();
-        setCourses(data.courses || []); 
+        setCourses(data.courses ?? data);
       } catch (err) {
         console.error("Failed to load courses:", err);
       }
@@ -65,39 +65,3 @@ const StudentCourses = () => {
 export default StudentCourses;
 
 
-
-
-
-// import { useEffect, useState } from "react";
-// import { Link } from "react-router-dom";
-// import api from "../../services/api";
-
-// export default function StudentCourses() {
-//   const [courses, setCourses] = useState([]);
-
-//   useEffect(() => {
-//     api.get("/student/courses").then((res) => setCourses(res.data.courses));
-//   }, []);
-
-//   return (
-//     <div className="p-6">
-//       <h1 className="text-xl font-bold mb-4">Your Courses</h1>
-
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//         {courses.map((c) => (
-//           <div key={c.id} className="border rounded p-4">
-//             <h2 className="font-semibold">{c.title}</h2>
-//             <p className="text-gray-600">{c.description}</p>
-
-//             <Link
-//               to={`/student/course/${c.id}`}
-//               className="inline-block mt-3 bg-blue-500 text-white px-4 py-2 rounded"
-//             >
-//               View Course
-//             </Link>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// }
