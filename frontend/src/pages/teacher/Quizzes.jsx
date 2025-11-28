@@ -67,7 +67,8 @@ const TeacherQuizzes = () => {
         <h2 className="font-semibold mb-2">Create New Quiz</h2>
         <select
           value={newQuiz.course_id}
-          onChange={e => setNewQuiz({...newQuiz, course_id: e.target.value})}
+          onChange={e => setNewQuiz({ ...newQuiz, course_id: parseInt(e.target.value) })}
+
           className="w-full p-2 border rounded mb-2"
           required
         >

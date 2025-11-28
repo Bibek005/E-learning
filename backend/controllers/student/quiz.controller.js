@@ -1,44 +1,71 @@
 const db = require("../../config/db");
 
+// GET /api/student/quiz/start/:quizId
 exports.getQuiz = async (req, res) => {
-  const { quizId } = req.params;
+  const quizId = req.params.quizId;
+  try {
+    const [quizRows] = await db.query(
+      "SELECT id, title, course_id FROM quizzes WHERE id = ?", 
+      [quizId]
+    );
 
-  const [quiz] = await db.query(`SELECT * FROM quizzes WHERE id=?`, [quizId]);
-  const [questions] = await db.query(
-    `SELECT id, question_text AS text, options
-     FROM quiz_questions WHERE quiz_id=?`,
-    [quizId]
-  );
+    if (!quizRows.length) 
+      return res.status(404).json({ message: "Quiz not found" });
 
-  res.json({
-    ...quiz[0],
-    questions: questions.map(q => ({
-      ...q,
+    const [questionRows] = await db.query(
+      "SELECT id, question_text, options, correct_answer FROM quiz_questions WHERE quiz_id = ?",
+      [quizId]
+    );
+
+    const questions = questionRows.map(q => ({
+      id: q.id,
+      question: q.question_text,
       options: JSON.parse(q.options)
-    }))
-  });
+    }));
+
+    res.json({ quiz: { ...quizRows[0], questions } });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
 
+// POST /api/student/quiz/submit/:quizId
 exports.submitQuiz = async (req, res) => {
-  const { quizId } = req.params;
-  const studentId = req.user.id;
+  const quizId = req.params.quizId;
+  const userId = req.user.id;
   const { answers } = req.body;
 
-  const [qList] = await db.query(
-    `SELECT id, correct_answer FROM quiz_questions WHERE quiz_id=?`,
-    [quizId]
-  );
+  try {
+    for (const questionId in answers) {
+      const answer = answers[questionId];
+      await db.query(
+        "INSERT INTO quiz_answers (user_id, quiz_id, question_id, answer) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE answer=?",
+        [userId, quizId, questionId, answer, answer]
+      );
+    }
 
-  let score = 0;
-  qList.forEach(q => {
-    if (answers[q.id] == q.correct_answer) score++;
-  });
+    res.json({ message: "Quiz submitted successfully" });
 
-  await db.query(
-    `INSERT INTO quiz_attempts (quiz_id, student_id, score, attempt_time, answers)
-     VALUES (?,?,?,?,?)`,
-    [quizId, studentId, score, new Date(), JSON.stringify(answers)]
-  );
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-  res.json({ success: true, score });
+exports.listQuizzes = async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT q.id, q.title, q.course_id,
+      (SELECT COUNT(*) FROM quiz_questions WHERE quiz_id = q.id) AS totalQuestions
+      FROM quizzes q
+    `);
+
+    res.json({ quizzes: rows });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal server error" });
+  }
 };
